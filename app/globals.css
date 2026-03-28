@@ -1,0 +1,173 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 355 100% 97%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 330 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 60 100% 50%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 270 100% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 10%;
+    --input: 0 0% 100%;
+    --ring: 330 100% 50%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background-color: #FFF0F5;
+    color: #111;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+}
+
+/* Y2K star background */
+.y2k-bg {
+  background-color: #FFF0F5;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(255, 20, 147, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(147, 20, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 60% 80%, rgba(255, 200, 0, 0.08) 0%, transparent 50%);
+}
+
+/* Chunky border style */
+.y2k-card {
+  background: white;
+  border: 3px solid #111;
+  border-radius: 16px;
+  box-shadow: 6px 6px 0px #111;
+}
+
+.y2k-card-pink {
+  background: #FFD6E8;
+  border: 3px solid #111;
+  border-radius: 16px;
+  box-shadow: 6px 6px 0px #111;
+}
+
+.y2k-btn {
+  background: #FF1493;
+  color: white;
+  border: 3px solid #111;
+  border-radius: 12px;
+  box-shadow: 4px 4px 0px #111;
+  font-weight: 800;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.y2k-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #111;
+}
+
+.y2k-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #111;
+}
+
+.y2k-btn:disabled {
+  background: #ccc;
+  color: #888;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 4px 4px 0px #999;
+}
+
+.y2k-input {
+  background: white;
+  border: 3px solid #111;
+  border-radius: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  color: #111;
+  transition: box-shadow 0.15s;
+}
+
+.y2k-input:focus {
+  outline: none;
+  box-shadow: 4px 4px 0px #FF1493;
+  border-color: #FF1493;
+}
+
+.y2k-input::placeholder {
+  color: #aaa;
+}
+
+/* Sticker badges */
+.sticker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 2px solid #111;
+  border-radius: 100px;
+  font-weight: 700;
+  font-size: 12px;
+  box-shadow: 2px 2px 0px #111;
+}
+
+/* Marquee text */
+.marquee-container {
+  overflow: hidden;
+  white-space: nowrap;
+  border-top: 2px solid #111;
+  border-bottom: 2px solid #111;
+  background: #FF1493;
+  color: white;
+  font-weight: 800;
+  padding: 6px 0;
+}
+
+.marquee-track {
+  display: inline-block;
+  animation: marquee 20s linear infinite;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* Slide in */
+@keyframes slideUp {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.slide-up {
+  animation: slideUp 0.4s ease-out forwards;
+}
+
+/* Wiggle */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+.wiggle {
+  animation: wiggle 0.5s ease-in-out infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #FFD6E8; }
+::-webkit-scrollbar-thumb { background: #FF1493; border-radius: 3px; }
