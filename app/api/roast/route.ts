@@ -12,10 +12,13 @@ const anthropic = new Anthropic({
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as RoastRequest;
-    const { profileType, profileUrl, profileText, imageBase64, claimedHeight } =
+    const { profileType, profileUrl, profileText, imageBase64, imageBase64s, claimedHeight } =
       body;
 
-    if (!profileText && !profileUrl && !imageBase64) {
+    // Support both single image (legacy) and multiple images
+    const images: string[] = imageBase64s ?? (imageBase64 ? [imageBase64] : []);
+
+    if (!profileText && !profileUrl && images.length === 0) {
       return NextResponse.json(
         { error: "Please provide profile text, URL, or an image to roast." },
         { status: 400 }
@@ -36,14 +39,13 @@ export async function POST(request: NextRequest) {
 
     const content: ContentBlock[] = [];
 
-    // Add image if provided
-    if (imageBase64) {
-      // imageBase64 may be a full data URL (data:image/png;base64,...) or raw base64
+    // Add all images
+    for (const img of images) {
       let mediaType: "image/jpeg" | "image/png" | "image/gif" | "image/webp" = "image/jpeg";
-      let base64Data = imageBase64;
+      let base64Data = img;
 
-      if (imageBase64.startsWith("data:")) {
-        const [header, data] = imageBase64.split(",");
+      if (img.startsWith("data:")) {
+        const [header, data] = img.split(",");
         base64Data = data;
         const mime = header.split(":")[1].split(";")[0];
         if (mime === "image/png" || mime === "image/gif" || mime === "image/webp") {
@@ -88,7 +90,7 @@ export async function POST(request: NextRequest) {
 
       // If every URL was blocked AND no text/images beyond the URL itself
       const hasRealText = profileText && profileText.replace(/https?:\/\/[^\s]+/g, "").trim().length > 20;
-      if (allBlocked && !anyFetched && !hasRealText && !imageBase64) {
+      if (allBlocked && !anyFetched && !hasRealText && images.length === 0) {
         allUrlsBlocked = true;
       }
     }

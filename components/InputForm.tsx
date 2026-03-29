@@ -50,7 +50,7 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
     onSubmit({
       profileType: "general",
       profileText: infoText || undefined,
-      imageBase64: imageBase64s[0] || undefined,
+      imageBase64s: imageBase64s.length > 0 ? imageBase64s : undefined,
     });
   };
 
@@ -80,7 +80,7 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
         </div>
       )}
 
-      {/* Screenshot upload */}
+      {/* Screenshot upload — up to 4 */}
       <div
         className="rounded-2xl cursor-pointer transition-all"
         style={{ border: `3px dashed ${dragOver ? "#FF1493" : "#ccc"}`, background: dragOver ? "#FFF0F5" : "transparent" }}
@@ -113,7 +113,7 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
         ) : (
           <div className="py-6 flex flex-col items-center gap-1 text-gray-400">
             <Upload className="w-5 h-5" />
-            <span className="text-xs font-semibold">Drop screenshots</span>
+            <span className="text-xs font-semibold">Drop screenshots (up to 4)</span>
           </div>
         )}
       </div>

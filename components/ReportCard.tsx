@@ -111,25 +111,28 @@ export default function ReportCard({ report, shareSlug, onReset }: ReportCardPro
             <p className="text-white font-bold text-base leading-snug">&ldquo;{report.funnyOneLiner}&rdquo;</p>
           </div>
 
-          {/* Flags — side by side */}
+          {/* Flags */}
           <div className="grid grid-cols-1 gap-3">
             {/* Red flags */}
             <div>
               <p className="font-black text-sm text-gray-900 mb-2">🚩 Red Flags</p>
               <div className="space-y-2">
-                {report.redFlags.map((flag, i) => (
+                {[...report.redFlags].sort((a, b) => {
+                  const order = { critical: 0, medium: 1, mild: 2 };
+                  return order[a.severity] - order[b.severity];
+                }).map((flag, i) => (
                   <div
                     key={i}
                     className="rounded-xl p-3 flex gap-2 items-start"
                     style={{
-                      background: flag.severity === "critical" ? "#FFE0E8" : flag.severity === "medium" ? "#FFF3E0" : "#FFFDE7",
+                      background: flag.severity === "critical" ? "#FF1493" : flag.severity === "medium" ? "#FFB3D1" : "#FFE0ED",
                       border: "2px solid #111",
                     }}
                   >
                     <span className="text-xs mt-0.5 shrink-0">{getSeverityEmoji(flag.severity)}</span>
                     <div>
-                      <p className="font-bold text-sm text-gray-900 leading-tight">{flag.flag}</p>
-                      <p className="text-xs text-gray-600 mt-0.5 italic">{flag.roast}</p>
+                      <p className={`font-bold text-sm leading-tight ${flag.severity === "critical" ? "text-white" : "text-gray-900"}`}>{flag.flag}</p>
+                      <p className={`text-xs mt-0.5 italic ${flag.severity === "critical" ? "text-pink-100" : "text-gray-600"}`}>{flag.roast}</p>
                     </div>
                   </div>
                 ))}
@@ -161,9 +164,9 @@ export default function ReportCard({ report, shareSlug, onReset }: ReportCardPro
               <p className="font-black text-sm text-gray-900 mb-2">🤵 LinkedIn Decoded</p>
               <div className="space-y-2">
                 {report.linkedInTranslations.map((t, i) => (
-                  <div key={i} className="rounded-xl p-3" style={{ background: "#EEE8FF", border: "2px solid #111" }}>
+                  <div key={i} className="rounded-xl p-3" style={{ background: "#FFE0ED", border: "2px solid #111" }}>
                     <p className="text-xs text-gray-500">He says: <span className="font-bold text-gray-900">&ldquo;{t.buzzword}&rdquo;</span></p>
-                    <p className="text-xs text-purple-700 font-semibold mt-0.5">→ {t.translation}</p>
+                    <p className="text-xs font-semibold mt-0.5" style={{ color: "#D6006E" }}>→ {t.translation}</p>
                   </div>
                 ))}
               </div>
@@ -172,24 +175,24 @@ export default function ReportCard({ report, shareSlug, onReset }: ReportCardPro
 
           {/* Height audit — only if present */}
           {report.heightAudit && (
-            <div className="rounded-xl p-4" style={{ background: "#FFF8E1", border: "2px solid #111" }}>
+            <div className="rounded-xl p-4" style={{ background: "#FFB3D1", border: "2px solid #111" }}>
               <p className="font-black text-sm text-gray-900 mb-2">📏 Height Audit™</p>
               <div className="flex gap-5 items-center mb-1">
                 <div>
-                  <p className="text-xs text-gray-500">Claims</p>
+                  <p className="text-xs text-gray-600">Claims</p>
                   <p className="font-black text-gray-900">{report.heightAudit.claimed}</p>
                 </div>
                 <span className="text-lg">→</span>
                 <div>
-                  <p className="text-xs text-gray-500">Actually</p>
-                  <p className="font-black" style={{ color: "#FF6600" }}>{report.heightAudit.actual}</p>
+                  <p className="text-xs text-gray-600">Actually</p>
+                  <p className="font-black" style={{ color: "#C40060" }}>{report.heightAudit.actual}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Off by</p>
+                  <p className="text-xs text-gray-600">Off by</p>
                   <p className="font-black" style={{ color: "#FF1493" }}>{report.heightAudit.deflationAmount}</p>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 italic">{report.heightAudit.comment}</p>
+              <p className="text-xs text-gray-700 italic">{report.heightAudit.comment}</p>
             </div>
           )}
 
@@ -199,8 +202,8 @@ export default function ReportCard({ report, shareSlug, onReset }: ReportCardPro
           </div>
 
           {/* Share caption */}
-          <div className="rounded-2xl p-4 text-center" style={{ background: "#9314FF", border: "3px solid #111" }}>
-            <p className="text-xs font-bold text-purple-200 uppercase tracking-widest mb-1">📲 Send to the group chat</p>
+          <div className="rounded-2xl p-4 text-center" style={{ background: "#FF1493", border: "3px solid #111" }}>
+            <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#FFD6E8" }}>📲 Send to the group chat</p>
             <p className="text-white font-black text-sm">{report.shareableCaption}</p>
           </div>
 

@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { DatingAuditReport } from "@/types";
 import ReportCard from "@/components/ReportCard";
-import { Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface SharedReportViewProps {
   report: DatingAuditReport;
@@ -16,20 +14,22 @@ export default function SharedReportView({
   slug,
 }: SharedReportViewProps) {
   return (
-    <main className="min-h-screen bg-[#0a0a0a]">
-      <div className="max-w-2xl mx-auto px-4 py-8">
+    <main className="min-h-screen y2k-bg">
+      <div className="max-w-lg mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
           <Link href="/">
-            <div className="inline-flex items-center gap-2 bg-neon-red/10 border border-neon-red/30 rounded-full px-4 py-1.5 text-xs text-neon-red font-medium mb-4 hover:bg-neon-red/20 transition-colors">
-              <Zap className="w-3 h-3" />
-              Should I Date This Man?
-            </div>
+            <span
+              className="sticker inline-flex items-center mb-4"
+              style={{ background: "#FFD6E8" }}
+            >
+              🚩 Should I Date This Man?
+            </span>
           </Link>
-          <h1 className="text-2xl font-black text-white">
+          <h1 className="text-2xl font-black text-gray-900">
             Shared Dating Audit 📋
           </h1>
-          <p className="text-gray-400 text-sm mt-1">
+          <p className="text-gray-500 text-sm mt-1">
             Someone wanted you to see this...
           </p>
         </div>
@@ -41,18 +41,17 @@ export default function SharedReportView({
         />
 
         {/* CTA */}
-        <div className="mt-8 text-center bg-white/[0.03] border border-white/10 rounded-2xl p-6">
-          <p className="text-white font-bold text-lg mb-2">
+        <div className="mt-8 y2k-card p-6 text-center">
+          <p className="font-black text-lg text-gray-900 mb-2">
             Want to audit your situationship? 👀
           </p>
-          <p className="text-gray-400 text-sm mb-4">
+          <p className="text-gray-500 text-sm mb-4">
             Paste their profile and get the full roast — free, instant, brutal.
           </p>
           <Link href="/">
-            <Button size="lg">
-              <Zap className="w-4 h-4" />
-              Audit My Man
-            </Button>
+            <button className="y2k-btn px-6 py-3 text-base">
+              🚩 Audit My Man
+            </button>
           </Link>
         </div>
       </div>

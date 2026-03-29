@@ -5,6 +5,7 @@ export interface RoastRequest {
   profileUrl?: string;
   profileText?: string;
   imageBase64?: string;
+  imageBase64s?: string[];
   claimedHeight?: string;
 }
 
