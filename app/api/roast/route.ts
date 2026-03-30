@@ -182,6 +182,13 @@ export async function POST(request: NextRequest) {
         .replace(/\n?```$/m, "")
         .trim();
       report = JSON.parse(cleaned) as DatingAuditReport;
+
+      // Strip height audit if the input didn't mention height
+      const inputText = (profileText ?? "") + fetchedContent;
+      const mentionsHeight = /\b\d['′']\s*\d{1,2}["″"]?|\b\d\s*(?:ft|feet|foot)\b|\bcm\b|\b(?:5|6|7)['′']\b/i.test(inputText);
+      if (!mentionsHeight) {
+        delete report.heightAudit;
+      }
     } catch {
       console.error("Failed to parse Claude response:", rawText);
       return NextResponse.json(
