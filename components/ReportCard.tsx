@@ -51,6 +51,7 @@ function CharacterImage({ name }: { name: string }) {
 interface ReportCardProps {
   report: DatingAuditReport;
   shareSlug?: string;
+  memeUrl?: string;
   onReset: () => void;
   originalRequest?: RoastRequest;
 }
@@ -206,7 +207,7 @@ function InputSummary({ request }: { request: RoastRequest }) {
   );
 }
 
-export default function ReportCard({ report, shareSlug, onReset, originalRequest }: ReportCardProps) {
+export default function ReportCard({ report, shareSlug, memeUrl, onReset, originalRequest }: ReportCardProps) {
   const reportRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -499,6 +500,28 @@ export default function ReportCard({ report, shareSlug, onReset, originalRequest
           >
             <p className="handwritten text-lg text-gray-800 leading-relaxed">{report.roastSummary}</p>
           </div>
+
+          {/* AI Meme */}
+          {memeUrl && (
+            <div
+              className="text-center"
+              style={{
+                transform: "rotate(0.8deg)",
+                boxShadow: "2px 3px 6px rgba(0,0,0,0.15)",
+              }}
+            >
+              <div className="p-3 pb-1" style={{ background: "var(--paper-dark)" }}>
+                <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">mood rn</p>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={memeUrl}
+                  alt="AI generated meme"
+                  className="w-full rounded"
+                  style={{ border: "3px solid white" }}
+                />
+              </div>
+            </div>
+          )}
 
           {/* Share caption */}
           <div

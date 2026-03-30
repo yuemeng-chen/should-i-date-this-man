@@ -55,6 +55,7 @@ function RansomTitle() {
 export default function Home() {
   const [report, setReport] = useState<DatingAuditReport | null>(null);
   const [shareSlug, setShareSlug] = useState<string | undefined>();
+  const [memeUrl, setMemeUrl] = useState<string | undefined>();
   const [lastRequest, setLastRequest] = useState<RoastRequest | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,6 +82,7 @@ export default function Home() {
 
       setReport(data.report);
       setShareSlug(data.shareSlug);
+      setMemeUrl(data.memeUrl);
 
       setTimeout(() => {
         document.getElementById("results")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -104,6 +106,7 @@ export default function Home() {
   const handleReset = () => {
     setReport(null);
     setShareSlug(undefined);
+    setMemeUrl(undefined);
     setLastRequest(null);
     setError(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -140,7 +143,7 @@ export default function Home() {
         {report && !isLoading && (
           <div id="results" className="slide-up">
             <ErrorBoundary onReset={handleReset}>
-              <ReportCard report={report} shareSlug={shareSlug} onReset={handleReset} originalRequest={lastRequest ?? undefined} />
+              <ReportCard report={report} shareSlug={shareSlug} memeUrl={memeUrl} onReset={handleReset} originalRequest={lastRequest ?? undefined} />
             </ErrorBoundary>
           </div>
         )}

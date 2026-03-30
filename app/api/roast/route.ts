@@ -200,11 +200,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Generate a meme (best effort, non-blocking)
+    let memeUrl: string | undefined;
+    const memelordKey = process.env.MEMELORD_API_KEY;
+    if (memelordKey) {
+      try {
+        const memePrompt = `${report.funnyOneLiner} — dating red flags, roast humor`;
+        const memeRes = await fetch("https://api.memelord.com/api/v1/ai-meme", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${memelordKey}`,
+          },
+          body: JSON.stringify({ prompt: memePrompt, count: 1, include_nsfw: false }),
+        });
+        if (memeRes.ok) {
+          const memeData = await memeRes.json();
+          memeUrl = memeData?.urls?.[0] ?? memeData?.url;
+        }
+      } catch (e) {
+        console.error("Meme generation failed:", e);
+      }
+    }
+
     // Save to Supabase (non-blocking, best effort)
     const saved = await saveReport(body, report);
 
     return NextResponse.json({
       report,
+      memeUrl,
       shareSlug: saved?.shareSlug,
     });
   } catch (error) {
