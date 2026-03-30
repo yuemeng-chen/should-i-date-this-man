@@ -57,14 +57,64 @@ function PngRansomTitle() {
   );
 }
 
+const SCORE_TIERS: { min: number; color: string; options: { stamp: string; subtitle: string }[] }[] = [
+  { min: 90, color: "#1B5E20", options: [
+    { stamp: "LOCK HIM DOWN", subtitle: "wife him up immediately, no cap" },
+    { stamp: "KEEPER", subtitle: "he's the blueprint honestly" },
+    { stamp: "WIFEY HIM", subtitle: "secure the bag before someone else does" },
+    { stamp: "MAIN CHARACTER", subtitle: "and for once that's a good thing" },
+    { stamp: "NO NOTES", subtitle: "we have nothing bad to say and we hate it" },
+  ]},
+  { min: 80, color: "#2E7D32", options: [
+    { stamp: "SLAY", subtitle: "ok he kinda ate ngl" },
+    { stamp: "HE ATE", subtitle: "left no crumbs either" },
+    { stamp: "GREEN FLAG", subtitle: "rare sighting, don't scare him away" },
+    { stamp: "PASSED THE VIBE CHECK", subtitle: "against all odds somehow" },
+    { stamp: "NOT DELUSIONAL", subtitle: "which is basically a superpower rn" },
+  ]},
+  { min: 65, color: "#558B2F", options: [
+    { stamp: "HE'S AIGHT", subtitle: "not the worst? the bar is underground tho" },
+    { stamp: "COULD BE WORSE", subtitle: "damning with faint praise but here we are" },
+    { stamp: "DECENT-ISH", subtitle: "your mom would tolerate him" },
+    { stamp: "LOW-KEY OK", subtitle: "he's a 6 who thinks he's a 9" },
+    { stamp: "ALMOST", subtitle: "so close yet so far bestie" },
+  ]},
+  { min: 50, color: "#E65100", options: [
+    { stamp: "MID", subtitle: "he's giving NPC energy" },
+    { stamp: "MEH", subtitle: "the human equivalent of room temperature water" },
+    { stamp: "BEIGE FLAG", subtitle: "not toxic just deeply boring" },
+    { stamp: "FORGETTABLE", subtitle: "you'll ghost him and forget you did" },
+    { stamp: "FILLER ARC", subtitle: "he's the episode you skip on rewatch" },
+  ]},
+  { min: 35, color: "#8B008B", options: [
+    { stamp: "ICK", subtitle: "the ick is strong with this one" },
+    { stamp: "CRINGE", subtitle: "physically recoiling through the screen" },
+    { stamp: "UNSERIOUS", subtitle: "he's out here playing games at big age" },
+    { stamp: "DELULU", subtitle: "the delusion is not the solusion babe" },
+    { stamp: "CAUGHT IN 4K", subtitle: "every photo is a new red flag" },
+  ]},
+  { min: 20, color: "#C40060", options: [
+    { stamp: "TOXIC", subtitle: "this man is a whole red flag factory" },
+    { stamp: "WALKING ICK", subtitle: "every swipe was a mistake" },
+    { stamp: "LANDFILL", subtitle: "the trash took itself out and came back" },
+    { stamp: "UNHINGED", subtitle: "bestie what were you thinking" },
+    { stamp: "SITUATIONSHIP STARTER KIT", subtitle: "he will waste your time professionally" },
+  ]},
+  { min: 0, color: "#8B0000", options: [
+    { stamp: "RUN", subtitle: "block, delete, witness protection" },
+    { stamp: "BLOCKED", subtitle: "do not pass go, do not collect his number" },
+    { stamp: "RESTRAINING ORDER", subtitle: "the courts would understand" },
+    { stamp: "DANGER", subtitle: "this man is a public safety hazard" },
+    { stamp: "ABORT MISSION", subtitle: "evacuate immediately this is not a drill" },
+  ]},
+];
+
 function getScoreTier(score: number) {
-  if (score >= 90) return { color: "#1B5E20", stamp: "LOCK HIM DOWN", subtitle: "wife him up immediately, no cap" };
-  if (score >= 80) return { color: "#2E7D32", stamp: "SLAY", subtitle: "ok he kinda ate ngl" };
-  if (score >= 65) return { color: "#558B2F", stamp: "HE'S AIGHT", subtitle: "not the worst? the bar is underground tho" };
-  if (score >= 50) return { color: "#E65100", stamp: "MID", subtitle: "he's giving NPC energy" };
-  if (score >= 35) return { color: "#8B008B", stamp: "ICK", subtitle: "the ick is strong with this one" };
-  if (score >= 20) return { color: "#C40060", stamp: "TOXIC", subtitle: "this man is a whole red flag factory" };
-  return { color: "#8B0000", stamp: "RUN", subtitle: "block, delete, witness protection" };
+  const tier = SCORE_TIERS.find(t => score >= t.min) ?? SCORE_TIERS[SCORE_TIERS.length - 1];
+  // Use score + current minute as seed so it's stable during a session but varies between reports
+  const seed = score * 31 + Math.floor(Date.now() / 60000);
+  const pick = tier.options[seed % tier.options.length];
+  return { color: tier.color, stamp: pick.stamp, subtitle: pick.subtitle };
 }
 
 function ScoreStamp({ score }: { score: number }) {
