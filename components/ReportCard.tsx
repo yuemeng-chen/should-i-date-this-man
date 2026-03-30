@@ -341,6 +341,33 @@ export default function ReportCard({ report, shareSlug, onReset, originalRequest
             </p>
           </div>
 
+          {/* Fictional lookalike */}
+          {report.fictionalLookalike && (
+            <div
+              className="p-4"
+              style={{
+                background: "var(--paper)",
+                borderLeft: "5px solid var(--pink-bg)",
+                transform: "rotate(-0.6deg)",
+                boxShadow: "1px 2px 4px rgba(0,0,0,0.1)",
+              }}
+            >
+              <p className="burn-heading text-lg text-gray-900 mb-3">🎭 Fictional Lookalike</p>
+              <div className="flex gap-4 items-center">
+                <CharacterImage name={report.fictionalLookalike.actor || report.fictionalLookalike.character} />
+                <div>
+                  <p className="font-black text-gray-900 text-base">
+                    {report.fictionalLookalike.character}
+                  </p>
+                  <p className="text-xs text-gray-500">{report.fictionalLookalike.source}</p>
+                  <p className="handwritten text-base mt-1" style={{ color: "var(--pink-burn)" }}>
+                    {report.fictionalLookalike.reason}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Red flags */}
           <div>
             <p className="burn-heading text-lg text-gray-900 mb-3">🚩 Red Flags</p>
@@ -458,33 +485,6 @@ export default function ReportCard({ report, shareSlug, onReset, originalRequest
                 </div>
               </div>
               <p className="handwritten text-base text-gray-500">{report.heightAudit.comment}</p>
-            </div>
-          )}
-
-          {/* Fictional lookalike */}
-          {report.fictionalLookalike && (
-            <div
-              className="p-4"
-              style={{
-                background: "var(--paper)",
-                borderLeft: "5px solid var(--pink-bg)",
-                transform: "rotate(-0.6deg)",
-                boxShadow: "1px 2px 4px rgba(0,0,0,0.1)",
-              }}
-            >
-              <p className="burn-heading text-lg text-gray-900 mb-3">🎭 Fictional Lookalike</p>
-              <div className="flex gap-4 items-center">
-                <CharacterImage name={report.fictionalLookalike.actor || report.fictionalLookalike.character} />
-                <div>
-                  <p className="font-black text-gray-900 text-base">
-                    {report.fictionalLookalike.character}
-                  </p>
-                  <p className="text-xs text-gray-500">{report.fictionalLookalike.source}</p>
-                  <p className="handwritten text-base mt-1" style={{ color: "var(--pink-burn)" }}>
-                    {report.fictionalLookalike.reason}
-                  </p>
-                </div>
-              </div>
             </div>
           )}
 
