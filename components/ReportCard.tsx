@@ -474,7 +474,7 @@ export default function ReportCard({ report, shareSlug, onReset, originalRequest
             >
               <p className="burn-heading text-lg text-gray-900 mb-3">🎭 Fictional Lookalike</p>
               <div className="flex gap-4 items-center">
-                <CharacterImage name={report.fictionalLookalike.character} />
+                <CharacterImage name={report.fictionalLookalike.actor || report.fictionalLookalike.character} />
                 <div>
                   <p className="font-black text-gray-900 text-base">
                     {report.fictionalLookalike.character}

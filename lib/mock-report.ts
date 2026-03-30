@@ -53,6 +53,7 @@ export const MOCK_REPORT: DatingAuditReport = {
   },
   fictionalLookalike: {
     character: "Barney Stinson",
+    actor: "Neil Patrick Harris",
     source: "How I Met Your Mother",
     reason: "Treats dating like a startup pitch deck with a 3-slide exit strategy.",
   },

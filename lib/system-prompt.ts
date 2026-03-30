@@ -74,6 +74,7 @@ Examples: "Thought leader" → posts 6am thinkpieces that say nothing | "Work ha
   },
   "fictionalLookalike": {
     "character": <well-known fictional character name — movies, TV, anime, books, games>,
+    "actor": <real actor/voice actor who plays them, for image lookup. Use most recognizable portrayal>,
     "source": <movie/show/book/game title>,
     "reason": <one funny sentence explaining why, max 15 words>
   },

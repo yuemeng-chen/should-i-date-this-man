@@ -38,6 +38,7 @@ export interface DatingAuditReport {
   };
   fictionalLookalike?: {
     character: string;
+    actor: string;
     source: string;
     reason: string;
   };
