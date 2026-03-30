@@ -51,6 +51,11 @@ export const MOCK_REPORT: DatingAuditReport = {
     deflationAmount: "-2 inches",
     comment: "Still tall, but the math ain't mathing.",
   },
+  fictionalLookalike: {
+    character: "Barney Stinson",
+    source: "How I Met Your Mother",
+    reason: "Treats dating like a startup pitch deck with a 3-slide exit strategy.",
+  },
   roastSummary:
     "He lives with his cofounder in Bushwick, so every date night ends with a standup meeting at 11pm. His startup is a ticketing platform for trading card conventions — so he's either a visionary or deeply unserious. You'll never be his top priority unless you can close a seed round. The height is real-adjacent though, so there's that.",
   funnyOneLiner:

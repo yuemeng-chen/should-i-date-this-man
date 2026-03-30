@@ -72,6 +72,11 @@ Examples: "Thought leader" → posts 6am thinkpieces that say nothing | "Work ha
     "deflationAmount": <e.g. "-2 inches">,
     "comment": <one funny line, max 10 words>
   },
+  "fictionalLookalike": {
+    "character": <well-known fictional character name — movies, TV, anime, books, games>,
+    "source": <movie/show/book/game title>,
+    "reason": <one funny sentence explaining why, max 15 words>
+  },
   "roastSummary": <3-4 SHORT punchy sentences total. Specific to this profile. No filler.>,
   "funnyOneLiner": <the one line that will make her spit out her drink>,
   "archetypeLabel": <archetype with emoji>,

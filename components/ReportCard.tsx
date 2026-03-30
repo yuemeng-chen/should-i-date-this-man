@@ -1,9 +1,52 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { DatingAuditReport, RoastRequest } from "@/types";
 import { getSeverityEmoji } from "@/lib/utils";
 import { Download, Copy, Check, RefreshCw, Share2 } from "lucide-react";
+
+function CharacterImage({ name }: { name: string }) {
+  const [src, setSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchImage = async () => {
+      try {
+        const res = await fetch(
+          `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name.replace(/ /g, "_"))}`
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.thumbnail?.source) {
+          setSrc(data.thumbnail.source);
+        }
+      } catch {
+        // silently fail — no image is fine
+      }
+    };
+    fetchImage();
+  }, [name]);
+
+  if (!src) {
+    return (
+      <div
+        className="shrink-0 flex items-center justify-center"
+        style={{ width: 72, height: 72, background: "var(--pink-light)", borderRadius: 8 }}
+      >
+        <span className="text-3xl">🎭</span>
+      </div>
+    );
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={name}
+      className="shrink-0 object-cover"
+      style={{ width: 72, height: 72, borderRadius: 8, border: "3px solid white", boxShadow: "2px 3px 6px rgba(0,0,0,0.15)" }}
+    />
+  );
+}
 
 interface ReportCardProps {
   report: DatingAuditReport;
@@ -415,6 +458,33 @@ export default function ReportCard({ report, shareSlug, onReset, originalRequest
                 </div>
               </div>
               <p className="handwritten text-base text-gray-500">{report.heightAudit.comment}</p>
+            </div>
+          )}
+
+          {/* Fictional lookalike */}
+          {report.fictionalLookalike && (
+            <div
+              className="p-4"
+              style={{
+                background: "var(--paper)",
+                borderLeft: "5px solid var(--pink-bg)",
+                transform: "rotate(-0.6deg)",
+                boxShadow: "1px 2px 4px rgba(0,0,0,0.1)",
+              }}
+            >
+              <p className="burn-heading text-lg text-gray-900 mb-3">🎭 Fictional Lookalike</p>
+              <div className="flex gap-4 items-center">
+                <CharacterImage name={report.fictionalLookalike.character} />
+                <div>
+                  <p className="font-black text-gray-900 text-base">
+                    {report.fictionalLookalike.character}
+                  </p>
+                  <p className="text-xs text-gray-500">{report.fictionalLookalike.source}</p>
+                  <p className="handwritten text-base mt-1" style={{ color: "var(--pink-burn)" }}>
+                    {report.fictionalLookalike.reason}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 

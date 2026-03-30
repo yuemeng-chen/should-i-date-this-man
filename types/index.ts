@@ -36,6 +36,11 @@ export interface DatingAuditReport {
     deflationAmount: string;
     comment: string;
   };
+  fictionalLookalike?: {
+    character: string;
+    source: string;
+    reason: string;
+  };
   roastSummary: string;
   funnyOneLiner: string;
   archetypeLabel: string;
