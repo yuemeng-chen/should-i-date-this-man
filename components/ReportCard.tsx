@@ -58,10 +58,13 @@ function PngRansomTitle() {
 }
 
 function getScoreTier(score: number) {
-  if (score >= 70) return { color: "#2E7D32", stamp: "SLAY", subtitle: "wife him up bestie" };
-  if (score >= 50) return { color: "#E65100", stamp: "RISKY", subtitle: "proceed with caution babe" };
-  if (score >= 30) return { color: "#8B008B", stamp: "ICK", subtitle: "the ick is strong with this one" };
-  return { color: "#C40060", stamp: "RUN", subtitle: "girl, delete his number" };
+  if (score >= 90) return { color: "#1B5E20", stamp: "LOCK HIM DOWN", subtitle: "wife him up immediately, no cap" };
+  if (score >= 80) return { color: "#2E7D32", stamp: "SLAY", subtitle: "ok he kinda ate ngl" };
+  if (score >= 65) return { color: "#558B2F", stamp: "HE'S AIGHT", subtitle: "not the worst? the bar is underground tho" };
+  if (score >= 50) return { color: "#E65100", stamp: "MID", subtitle: "he's giving NPC energy" };
+  if (score >= 35) return { color: "#8B008B", stamp: "ICK", subtitle: "the ick is strong with this one" };
+  if (score >= 20) return { color: "#C40060", stamp: "TOXIC", subtitle: "this man is a whole red flag factory" };
+  return { color: "#8B0000", stamp: "RUN", subtitle: "block, delete, witness protection" };
 }
 
 function ScoreStamp({ score }: { score: number }) {
