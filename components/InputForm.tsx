@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { RoastRequest } from "@/types";
-import { ImagePlus, X } from "lucide-react";
+import { Paperclip, X, Upload } from "lucide-react";
 
 function compressImage(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -49,11 +49,39 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleImageUpload = async (files: FileList) => {
+  const handleFileUpload = async (files: FileList) => {
     const newPreviews: string[] = [];
     const newBase64s: string[] = [];
 
     for (const file of Array.from(files)) {
+      if (file.type === "application/pdf") {
+        // Convert PDF pages to images using pdf.js via canvas
+        try {
+          const pdfjsLib = await import("pdfjs-dist");
+          pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          const pagesToRender = Math.min(pdf.numPages, 6 - newBase64s.length);
+          for (let i = 1; i <= pagesToRender; i++) {
+            const page = await pdf.getPage(i);
+            const viewport = page.getViewport({ scale: 2 });
+            const canvas = document.createElement("canvas");
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) continue;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await (page.render({ canvasContext: ctx, viewport } as any) as any).promise;
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+            newBase64s.push(dataUrl);
+            newPreviews.push(dataUrl);
+          }
+        } catch (e) {
+          console.error("PDF processing failed:", e);
+        }
+        continue;
+      }
+
       if (!file.type.startsWith("image/")) continue;
       const base64 = await compressImage(file);
       newBase64s.push(base64);
@@ -72,14 +100,14 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
-    if (e.dataTransfer.files.length) handleImageUpload(e.dataTransfer.files);
+    if (e.dataTransfer.files.length) handleFileUpload(e.dataTransfer.files);
   };
 
   const handlePaste = (e: React.ClipboardEvent) => {
     const files = e.clipboardData.files;
     if (files.length > 0) {
       e.preventDefault();
-      handleImageUpload(files);
+      handleFileUpload(files);
     }
   };
 
@@ -161,21 +189,23 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
 
         {/* Bottom toolbar */}
         <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200" style={{ background: "var(--paper-dark)" }}>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 transition-colors"
-              disabled={uploadedImages.length >= 6}
-            >
-              <ImagePlus className="w-5 h-5" />
-              <span className="text-xs font-medium">
-                {uploadedImages.length > 0
-                  ? `${uploadedImages.length}/6 screenshots`
-                  : "screenshots (up to 6)"}
-              </span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors"
+            style={{
+              background: "var(--pink-light)",
+              color: "var(--pink-burn)",
+              fontWeight: 700,
+              fontSize: "13px",
+            }}
+            disabled={uploadedImages.length >= 6}
+          >
+            <Upload className="w-4 h-4" />
+            {uploadedImages.length > 0
+              ? `${uploadedImages.length}/6 files`
+              : "screenshots / PDF (up to 6)"}
+          </button>
 
           <button
             type="submit"
@@ -190,10 +220,10 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,.pdf,.svg"
         multiple
         className="hidden"
-        onChange={(e) => { if (e.target.files) handleImageUpload(e.target.files); }}
+        onChange={(e) => { if (e.target.files) handleFileUpload(e.target.files); }}
       />
 
       {hasLinkedInUrlOnly && (
