@@ -59,7 +59,8 @@ function PngRansomTitle() {
 
 function getScoreTier(score: number) {
   if (score >= 70) return { color: "#2E7D32", stamp: "SLAY", subtitle: "wife him up bestie" };
-  if (score >= 45) return { color: "#E65100", stamp: "RISKY", subtitle: "proceed with caution babe" };
+  if (score >= 50) return { color: "#E65100", stamp: "RISKY", subtitle: "proceed with caution babe" };
+  if (score >= 30) return { color: "#8B008B", stamp: "ICK", subtitle: "the ick is strong with this one" };
   return { color: "#C40060", stamp: "RUN", subtitle: "girl, delete his number" };
 }
 
