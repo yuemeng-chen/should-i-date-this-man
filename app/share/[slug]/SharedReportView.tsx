@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { DatingAuditReport } from "@/types";
 import ReportCard from "@/components/ReportCard";
+import Doodles from "@/components/Doodles";
 
 interface SharedReportViewProps {
   report: DatingAuditReport;
@@ -14,24 +15,22 @@ export default function SharedReportView({
   slug,
 }: SharedReportViewProps) {
   return (
-    <main className="min-h-screen y2k-bg">
-      <div className="max-w-lg mx-auto px-4 py-8">
+    <main className="min-h-screen burn-book-bg">
+      <Doodles />
+      <div className="max-w-2xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="text-center mb-8">
           <Link href="/">
             <span
-              className="sticker inline-flex items-center mb-4"
-              style={{ background: "#FFD6E8" }}
+              className="sticker inline-flex items-center mb-4 cursor-pointer hover:bg-gray-50"
+              style={{ background: "var(--pink-light)" }}
             >
               🚩 Should I Date This Man?
             </span>
           </Link>
-          <h1 className="text-2xl font-black text-gray-900">
-            Shared Dating Audit 📋
+          <h1 className="burn-heading text-3xl text-white" style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.3)" }}>
+            someone sent you a page from the burn book 📖
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Someone wanted you to see this...
-          </p>
         </div>
 
         <ReportCard
@@ -41,16 +40,16 @@ export default function SharedReportView({
         />
 
         {/* CTA */}
-        <div className="mt-8 y2k-card p-6 text-center">
-          <p className="font-black text-lg text-gray-900 mb-2">
-            Want to audit your situationship? 👀
+        <div className="mt-8 scrapbook-card p-6 text-center" style={{ transform: "rotate(0.5deg)" }}>
+          <p className="burn-heading text-xl text-gray-900 mb-2">
+            want to add someone to the burn book? 👀
           </p>
-          <p className="text-gray-500 text-sm mb-4">
-            Paste their profile and get the full roast — free, instant, brutal.
+          <p className="handwritten text-lg text-gray-500 mb-4">
+            paste their profile and get the full roast
           </p>
           <Link href="/">
-            <button className="y2k-btn px-6 py-3 text-base">
-              🚩 Audit My Man
+            <button className="burn-btn px-6 py-3 text-base">
+              🚩 ROAST HIM
             </button>
           </Link>
         </div>

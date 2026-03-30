@@ -91,5 +91,5 @@ export async function fetchUrlContent(url: string): Promise<{ text: string; bloc
  */
 export function extractUrls(text: string): string[] {
   const urlRegex = /https?:\/\/[^\s"'<>)]+/g;
-  return [...new Set(text.match(urlRegex) ?? [])].slice(0, 3);
+  return Array.from(new Set(text.match(urlRegex) ?? [])).slice(0, 3);
 }

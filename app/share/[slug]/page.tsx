@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `Dating Audit: ${report.scoreLabel} (${report.dateabilityScore}/100) | Should I Date This Man?`,
+    title: `Dating Audit: ${report.dateabilityScore}/100 | Should I Date This Man?`,
     description: report.funnyOneLiner,
     openGraph: {
       title: `Should I Date This Man? Score: ${report.dateabilityScore}/100`,

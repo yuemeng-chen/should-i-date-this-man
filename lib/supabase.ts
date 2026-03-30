@@ -9,7 +9,6 @@ interface SupabaseReport {
   created_at: string;
   profile_type: string;
   dateability_score: number;
-  score_label: string;
   verdict: string;
   archetype_label: string;
   roast_summary: string;
@@ -82,9 +81,7 @@ export async function saveReport(
       body: JSON.stringify({
         profile_type: request.profileType,
         profile_url: request.profileUrl,
-        claimed_height: request.claimedHeight,
         dateability_score: report.dateabilityScore,
-        score_label: report.scoreLabel,
         verdict: report.verdict,
         archetype_label: report.archetypeLabel,
         roast_summary: report.roastSummary,
@@ -120,7 +117,6 @@ export async function getReportBySlug(
     const r = reports[0];
     return {
       dateabilityScore: r.dateability_score,
-      scoreLabel: r.score_label,
       verdict: r.verdict,
       archetypeLabel: r.archetype_label,
       roastSummary: r.roast_summary,

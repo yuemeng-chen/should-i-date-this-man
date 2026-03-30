@@ -6,7 +6,6 @@ export interface RoastRequest {
   profileText?: string;
   imageBase64?: string;
   imageBase64s?: string[];
-  claimedHeight?: string;
 }
 
 export interface RedFlag {
@@ -27,7 +26,6 @@ export interface LinkedInTranslation {
 
 export interface DatingAuditReport {
   dateabilityScore: number;
-  scoreLabel: string;
   verdict: string;
   redFlags: RedFlag[];
   greenFlags: GreenFlag[];

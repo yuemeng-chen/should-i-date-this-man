@@ -5,14 +5,63 @@ import { saveReport } from "@/lib/supabase";
 import { fetchUrlContent, extractUrls } from "@/lib/fetch-url";
 import { DatingAuditReport, RoastRequest } from "@/types";
 
+// --- In-memory rate limiter ---
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const RATE_LIMIT_MAX = 5;
+
+const rateLimitMap = new Map<string, { count: number; firstRequest: number }>();
+
+// Clean up stale entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  rateLimitMap.forEach((entry, ip) => {
+    if (now - entry.firstRequest > RATE_LIMIT_WINDOW_MS) {
+      rateLimitMap.delete(ip);
+    }
+  });
+}, 5 * 60 * 1000);
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+
+  if (!entry || now - entry.firstRequest > RATE_LIMIT_WINDOW_MS) {
+    rateLimitMap.set(ip, { count: 1, firstRequest: now });
+    return false;
+  }
+
+  entry.count++;
+  return entry.count > RATE_LIMIT_MAX;
+}
+
+function getClientIp(request: NextRequest): string {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) {
+    return forwarded.split(",")[0].trim();
+  }
+  return request.headers.get("x-real-ip") ?? "unknown";
+}
+
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 export async function POST(request: NextRequest) {
+  // Rate limit check
+  const clientIp = getClientIp(request);
+  if (isRateLimited(clientIp)) {
+    return NextResponse.json(
+      {
+        error:
+          "Slow down, girl! You've roasted 5 profiles in 10 minutes. Either you're speed-dating or you need to touch grass. Try again later. 💅",
+      },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = (await request.json()) as RoastRequest;
-    const { profileType, profileUrl, profileText, imageBase64, imageBase64s, claimedHeight } =
+    const { profileType, profileUrl, profileText, imageBase64, imageBase64s } =
       body;
 
     // Support both single image (legacy) and multiple images
@@ -106,13 +155,12 @@ export async function POST(request: NextRequest) {
     const userPrompt = buildUserPrompt(
       profileType,
       profileUrl,
-      profileText ? profileText + fetchedContent : fetchedContent || undefined,
-      claimedHeight
+      profileText ? profileText + fetchedContent : fetchedContent || undefined
     );
     content.push({ type: "text", text: userPrompt });
 
     const response = await anthropic.messages.create({
-      model: "claude-opus-4-6",
+      model: "claude-sonnet-4-6",
       max_tokens: 4096,
       system: ROAST_SYSTEM_PROMPT,
       messages: [{ role: "user", content }],

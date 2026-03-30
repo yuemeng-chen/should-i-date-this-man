@@ -5,10 +5,57 @@ import InputForm from "@/components/InputForm";
 import ReportCard from "@/components/ReportCard";
 import LoadingState from "@/components/LoadingState";
 import { DatingAuditReport, RoastRequest } from "@/types";
+import Doodles from "@/components/Doodles";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import { MOCK_REPORT } from "@/lib/mock-report";
+
+/* Ransom-note title: each letter gets a random style + rotation */
+function RansomTitle() {
+  const words = [
+    { text: "Should", break: false },
+    { text: "I", break: false },
+    { text: "Date", break: true },
+    { text: "This", break: false },
+    { text: "Man?", break: false },
+  ];
+
+  const styles = ["ransom-dark", "ransom-light", "ransom-pink", "ransom-paper"];
+  const rotations = [-4, -2, 1, 3, -1, 2, -3, 0, 4, -2, 1, -1, 3, -3, 2, 0, -4, 1, -2, 3];
+
+  let letterIndex = 0;
+
+  return (
+    <h1 className="text-center leading-relaxed mb-2" style={{ fontSize: "clamp(3rem, 10vw, 5.5rem)", lineHeight: 1.2 }}>
+      {words.map((word, wi) => (
+        <span key={wi}>
+          {word.break && <br />}
+          <span className="inline-block mx-1 whitespace-nowrap">
+            {word.text.split("").map((letter, li) => {
+              const style = styles[(letterIndex) % styles.length];
+              const rot = rotations[letterIndex % rotations.length];
+              letterIndex++;
+              return (
+                <span
+                  key={li}
+                  className={`ransom-letter ${style}`}
+                  style={{ transform: `rotate(${rot}deg)`, display: "inline-block" }}
+                >
+                  {letter}
+                </span>
+              );
+            })}
+          </span>
+          {" "}
+        </span>
+      ))}
+    </h1>
+  );
+}
 
 export default function Home() {
   const [report, setReport] = useState<DatingAuditReport | null>(null);
   const [shareSlug, setShareSlug] = useState<string | undefined>();
+  const [lastRequest, setLastRequest] = useState<RoastRequest | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,6 +63,7 @@ export default function Home() {
     setIsLoading(true);
     setError(null);
     setReport(null);
+    setLastRequest(request);
 
     try {
       const response = await fetch("/api/roast", {
@@ -44,43 +92,46 @@ export default function Home() {
     }
   };
 
+  const handleTestMode = () => {
+    setLastRequest({ profileType: "general", profileText: "[TEST MODE]" });
+    setReport(MOCK_REPORT);
+    setShareSlug(undefined);
+    setTimeout(() => {
+      document.getElementById("results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  };
+
   const handleReset = () => {
     setReport(null);
     setShareSlug(undefined);
+    setLastRequest(null);
     setError(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
-    <main className="min-h-screen y2k-bg">
-      <div className="max-w-lg mx-auto px-4 py-16">
+    <main className="min-h-screen burn-book-bg flex flex-col">
+      <Doodles />
+      <div className="max-w-4xl mx-auto px-6 flex-1 flex flex-col w-full">
+
+        {/* Spacer to push title down */}
+        <div className="min-h-[10vh]" />
 
         {/* Header */}
-        <div className="text-center mb-10">
-          <h1 className="font-black leading-none mb-4 text-gray-900 uppercase tracking-tight" style={{ fontSize: "clamp(3.5rem, 14vw, 6rem)", lineHeight: 0.9 }}>
-            Should I<br />
-            Date This<br />
-            <span style={{ color: "#FF1493", WebkitTextStroke: "2px #111", paintOrder: "stroke fill" }}>
-              Man?
-            </span>
-          </h1>
-          <p className="text-gray-400 text-sm">
-            Paste anything. Get the truth.
+        <div className="text-center mb-8">
+          <RansomTitle />
+          <p className="handwritten text-2xl text-white" style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.3)" }}>
+            paste his profile. get the truth. 💋
           </p>
         </div>
-
-        {/* Input */}
-        {!isLoading && !report && (
-          <InputForm onSubmit={handleSubmit} isLoading={isLoading} />
-        )}
 
         {isLoading && <LoadingState />}
 
         {error && !isLoading && (
-          <div className="y2k-card p-5" style={{ background: "#FFF0F5" }}>
-            <p className="font-black mb-2" style={{ color: "#FF1493" }}>Need more tea ☕</p>
+          <div className="scrapbook-card p-5 tilt-left">
+            <p className="burn-heading text-xl mb-2" style={{ color: "var(--pink-hot)" }}>need more tea ☕</p>
             <p className="text-sm text-gray-700 mb-4 leading-relaxed">{error}</p>
-            <button onClick={handleReset} className="y2k-btn px-5 py-2 text-sm">
+            <button onClick={handleReset} className="burn-btn px-5 py-2 text-sm">
               Try again
             </button>
           </div>
@@ -88,7 +139,27 @@ export default function Home() {
 
         {report && !isLoading && (
           <div id="results" className="slide-up">
-            <ReportCard report={report} shareSlug={shareSlug} onReset={handleReset} />
+            <ErrorBoundary onReset={handleReset}>
+              <ReportCard report={report} shareSlug={shareSlug} onReset={handleReset} originalRequest={lastRequest ?? undefined} />
+            </ErrorBoundary>
+          </div>
+        )}
+
+        {/* Spacer between title and input */}
+        {!isLoading && !report && <div className="min-h-[3vh]" />}
+
+        {/* Input */}
+        {!isLoading && !report && (
+          <div className="slide-up pb-8">
+            <InputForm onSubmit={handleSubmit} isLoading={isLoading} />
+            {process.env.NODE_ENV === "development" && (
+              <button
+                onClick={handleTestMode}
+                className="mt-3 w-full text-xs text-gray-400 hover:text-gray-600 py-2 opacity-50 hover:opacity-100 transition-opacity"
+              >
+                🧪 test mode — skip API
+              </button>
+            )}
           </div>
         )}
 
