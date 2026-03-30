@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
 
     if (allUrlsBlocked) {
       return NextResponse.json(
-        { error: "LinkedIn is behind a login wall — we can't read it. Copy-paste his About section, headline, or job title directly into the box for a proper roast." },
+        { error: "We can't read that link bestie 🔒 Screenshot his profile and upload it instead, or copy-paste his bio text directly." },
         { status: 400 }
       );
     }
