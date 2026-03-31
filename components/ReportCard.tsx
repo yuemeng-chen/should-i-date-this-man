@@ -465,7 +465,7 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
           {/* Fictional lookalike */}
           {/* Lookalike + Meme side by side */}
           {(report.fictionalLookalike || memeUrl) && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
+            <div className={`grid grid-cols-1 ${memeUrl && report.fictionalLookalike ? 'sm:grid-cols-2' : ''} gap-4 items-stretch`}>
               {/* Fictional Lookalike */}
               {report.fictionalLookalike && (
                 <div
@@ -518,7 +518,7 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
                       <img
                         src={memeUrl}
                         alt="AI generated meme"
-                        className="w-full object-cover aspect-square"
+                        className="w-full"
                       />
                     </div>
                   </div>
