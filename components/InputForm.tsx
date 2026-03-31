@@ -193,24 +193,26 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
 
         {/* Bottom toolbar */}
         <div className="relative flex items-center justify-between px-4 py-4 border-t border-gray-200" style={{ background: "var(--paper-dark)" }}>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 min-w-0">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 hover:underline transition-all"
+              className="flex items-center gap-1.5 hover:underline transition-all min-w-0"
               style={{
                 background: "transparent",
                 color: "var(--pink-burn)",
                 fontWeight: 600,
-                fontSize: "13px",
+                fontSize: "12px",
                 border: "none",
               }}
               disabled={uploadedImages.length >= 6}
             >
               <Paperclip className="w-3.5 h-3.5 shrink-0" />
-              {uploadedImages.length > 0
-                ? `${uploadedImages.length}/6 files`
-                : "drop or upload · screenshots work best"}
+              <span>
+                {uploadedImages.length > 0
+                  ? `${uploadedImages.length}/6 files`
+                  : (<><span className="hidden sm:inline">drop or upload · screenshots work best</span><span className="sm:hidden">upload screenshots</span></>)}
+              </span>
             </button>
             <button
               type="button"
@@ -229,7 +231,7 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
           <button
             type="submit"
             disabled={!canSubmit}
-            className="burn-btn px-6 py-3 text-base font-bold"
+            className="burn-btn px-4 py-2.5 text-sm font-bold shrink-0 ml-3 whitespace-nowrap"
           >
             Should I?
           </button>
