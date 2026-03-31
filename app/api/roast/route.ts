@@ -200,13 +200,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate a meme (best effort, non-blocking)
+    // Generate a meme (best effort, non-blocking) — skip for girl profiles & support mode
+    const skipMeme = (report.dateabilityScore >= 90 && report.redFlags.length === 0) || report.supportMode;
     let memeUrl: string | undefined;
     const memelordKey = process.env.MEMELORD_API_KEY;
-    if (memelordKey) {
+    if (memelordKey && !skipMeme) {
       try {
-        const memePrompt = `${report.funnyOneLiner} — dating red flags, roast humor`;
-        const memeRes = await fetch("https://api.memelord.com/api/v1/ai-meme", {
+        const topFlag = report.redFlags?.[0]?.roast ?? "";
+        const memePrompt = `girl roasting a guy's dating profile from a woman's perspective: he's a ${report.archetypeLabel}. ${topFlag}. ${report.funnyOneLiner}. Make it from HER point of view, not his.`;
+        const memeRes = await fetch("https://www.memelord.com/api/v1/ai-meme", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -214,9 +216,12 @@ export async function POST(request: NextRequest) {
           },
           body: JSON.stringify({ prompt: memePrompt, count: 1, include_nsfw: false }),
         });
+        const memeData = await memeRes.json();
+        console.log("Memelord response:", JSON.stringify(memeData, null, 2));
         if (memeRes.ok) {
-          const memeData = await memeRes.json();
-          memeUrl = memeData?.urls?.[0] ?? memeData?.url;
+          memeUrl = memeData?.results?.[0]?.url;
+        } else {
+          console.error("Memelord error:", memeRes.status, memeData);
         }
       } catch (e) {
         console.error("Meme generation failed:", e);

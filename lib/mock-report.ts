@@ -64,4 +64,5 @@ export const MOCK_REPORT: DatingAuditReport = {
   archetypeLabel: "📱 Tech Bro Villain",
   shareableCaption:
     "🚩 He's disrupting Yu-Gi-Oh ticketing and expecting you to be impressed",
+  memeCaption: "pov: he said 'i'm not like other guys' and he was right — he was worse",
 };

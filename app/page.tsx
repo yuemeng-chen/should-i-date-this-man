@@ -113,18 +113,15 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen burn-book-bg flex flex-col">
+    <main className={`burn-book-bg flex flex-col ${!report && !isLoading && !error ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
       <Doodles />
-      <div className="max-w-4xl mx-auto px-6 flex-1 flex flex-col w-full">
-
-        {/* Spacer to push title down */}
-        <div className="min-h-[10vh]" />
+      <div className={`max-w-4xl mx-auto px-6 flex-1 flex flex-col w-full ${!report && !isLoading && !error ? 'justify-center' : 'pt-[8vh]'}`}>
 
         {/* Header */}
         <div className="text-center mb-8">
           <RansomTitle />
           <p className="handwritten text-2xl text-white" style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.3)" }}>
-            paste his profile. get the truth. 💋
+            tell the burn book everything you know about him 💋
           </p>
         </div>
 
@@ -148,8 +145,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Spacer between title and input */}
-        {!isLoading && !report && <div className="min-h-[3vh]" />}
 
         {/* Input */}
         {!isLoading && !report && (
@@ -167,6 +162,11 @@ export default function Home() {
         )}
 
       </div>
+
+      {/* Footer */}
+      <footer className="text-center py-6 mt-auto">
+        <p className="text-xs text-white/40">By Nicole Chen and Naomi Wang | SillyHacks NYC 2026</p>
+      </footer>
     </main>
   );
 }

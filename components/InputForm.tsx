@@ -188,31 +188,32 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
         />
 
         {/* Bottom toolbar */}
-        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200" style={{ background: "var(--paper-dark)" }}>
+        <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200" style={{ background: "var(--paper-dark)" }}>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors"
+            className="flex items-center gap-2 hover:underline transition-all"
             style={{
-              background: "var(--pink-light)",
+              background: "transparent",
               color: "var(--pink-burn)",
-              fontWeight: 700,
+              fontWeight: 600,
               fontSize: "13px",
+              border: "none",
             }}
             disabled={uploadedImages.length >= 6}
           >
-            <Upload className="w-4 h-4" />
+            <Paperclip className="w-4 h-4 shrink-0" />
             {uploadedImages.length > 0
               ? `${uploadedImages.length}/6 files`
-              : "screenshots / PDF (up to 6)"}
+              : "drag & drop or upload any proof you have"}
           </button>
 
           <button
             type="submit"
             disabled={!canSubmit}
-            className="burn-btn px-5 py-2 text-sm"
+            className="burn-btn px-6 py-3 text-base font-bold"
           >
-            EXPOSE HIM
+            Should I?
           </button>
         </div>
       </div>

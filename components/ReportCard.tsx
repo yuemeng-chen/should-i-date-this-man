@@ -30,9 +30,9 @@ function CharacterImage({ name }: { name: string }) {
     return (
       <div
         className="shrink-0 flex items-center justify-center"
-        style={{ width: 72, height: 72, background: "var(--pink-light)", borderRadius: 8 }}
+        style={{ width: 120, height: 120, background: "var(--pink-light)", borderRadius: 8 }}
       >
-        <span className="text-3xl">🎭</span>
+        <span className="text-4xl">🎭</span>
       </div>
     );
   }
@@ -43,7 +43,7 @@ function CharacterImage({ name }: { name: string }) {
       src={src}
       alt={name}
       className="shrink-0 object-cover"
-      style={{ width: 72, height: 72, borderRadius: 8, border: "3px solid white", boxShadow: "2px 3px 6px rgba(0,0,0,0.15)" }}
+      style={{ width: 120, height: 120, borderRadius: 8, border: "3px solid white", boxShadow: "2px 3px 6px rgba(0,0,0,0.15)" }}
     />
   );
 }
@@ -101,6 +101,16 @@ function PngRansomTitle() {
   );
 }
 
+const GIRL_ARCHETYPES = ["👑 Main Character", "💅 She's The Moment", "✨ Out of His League", "🦋 Too Good For This App", "💕 Wifey Material", "🔥 The One That Got Away"];
+
+const GIRL_STAMPS: { stamp: string; subtitle: string }[] = [
+  { stamp: "SHE'S THE MOMENT", subtitle: "no notes, just vibes" },
+  { stamp: "QUEEN", subtitle: "she ate and left no crumbs" },
+  { stamp: "CERTIFIED SLAY", subtitle: "he should be so lucky" },
+  { stamp: "MAIN CHARACTER", subtitle: "and everyone else is an extra" },
+  { stamp: "ICONIC", subtitle: "the blueprint tbh" },
+];
+
 const SCORE_TIERS: { min: number; color: string; options: { stamp: string; subtitle: string }[] }[] = [
   { min: 90, color: "#1B5E20", options: [
     { stamp: "LOCK HIM DOWN", subtitle: "wife him up immediately, no cap" },
@@ -153,16 +163,23 @@ const SCORE_TIERS: { min: number; color: string; options: { stamp: string; subti
   ]},
 ];
 
-function getScoreTier(score: number) {
+function getScoreTier(score: number, archetype?: string) {
+  const isGirlProfile = archetype && GIRL_ARCHETYPES.includes(archetype);
+
+  if (isGirlProfile) {
+    const seed = score * 31 + Math.floor(Date.now() / 60000);
+    const pick = GIRL_STAMPS[seed % GIRL_STAMPS.length];
+    return { color: "#D4488E", stamp: pick.stamp, subtitle: pick.subtitle };
+  }
+
   const tier = SCORE_TIERS.find(t => score >= t.min) ?? SCORE_TIERS[SCORE_TIERS.length - 1];
-  // Use score + current minute as seed so it's stable during a session but varies between reports
   const seed = score * 31 + Math.floor(Date.now() / 60000);
   const pick = tier.options[seed % tier.options.length];
   return { color: tier.color, stamp: pick.stamp, subtitle: pick.subtitle };
 }
 
-function ScoreStamp({ score }: { score: number }) {
-  const { color, stamp: label } = getScoreTier(score);
+function ScoreStamp({ score, archetype }: { score: number; archetype?: string }) {
+  const { color, stamp: label } = getScoreTier(score, archetype);
   return (
     <div className="relative inline-flex items-center justify-center">
       <div
@@ -205,6 +222,18 @@ function InputSummary({ request }: { request: RoastRequest }) {
       )}
     </div>
   );
+}
+
+const GIRL_REPORT = {
+  archetypeLabel: "✨ Out of His League",
+  dateabilityScore: 100,
+  verdict: "She's the moment. He should be auditioning for her.",
+  funnyOneLiner: "She's not out of your league, she's out of your time zone, your tax bracket, and your vibe.",
+  shareableCaption: "👑 she doesn't need a man, a man needs her",
+};
+
+function isGirlProfile(report: DatingAuditReport): boolean {
+  return GIRL_ARCHETYPES.includes(report.archetypeLabel);
 }
 
 export default function ReportCard({ report, shareSlug, memeUrl, onReset, originalRequest }: ReportCardProps) {
@@ -255,6 +284,101 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
       handleCopy();
     }
   };
+
+  // Girl profile — show generic hardcoded response
+  if (isGirlProfile(report)) {
+    const g = GIRL_REPORT;
+    return (
+      <div className="space-y-4">
+        <div ref={reportRef}>
+          <div className="scrapbook-card overflow-hidden">
+            {/* Header */}
+            <div className="p-6 md:p-8 text-center relative" style={{ background: "var(--pink-light)", borderBottom: "2px solid rgba(0,0,0,0.1)" }}>
+              <p className="handwritten text-lg text-gray-500 mb-1">the burn book says...</p>
+              <div
+                className="inline-block px-4 py-1 mb-2"
+                style={{
+                  background: "var(--ink)",
+                  color: "white",
+                  transform: "rotate(-2deg)",
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontWeight: 800,
+                  fontSize: "13px",
+                  letterSpacing: "1px",
+                }}
+              >
+                {g.archetypeLabel}
+              </div>
+            </div>
+
+            <div className="p-6 md:p-8 space-y-6">
+              {/* Score — always 100 */}
+              <div className="text-center space-y-3 py-4">
+                <div className="mb-20">
+                  <ScoreStamp score={100} archetype={g.archetypeLabel} />
+                </div>
+                <p className="burn-heading text-lg text-gray-900">{getScoreTier(100, g.archetypeLabel).subtitle}</p>
+                <p className="handwritten text-xl text-gray-600">{g.verdict}</p>
+              </div>
+
+              {/* One liner */}
+              <div
+                className="p-4 text-center relative"
+                style={{
+                  background: "var(--ink)",
+                  transform: "rotate(0.8deg)",
+                  boxShadow: "3px 4px 8px rgba(0,0,0,0.2)",
+                }}
+              >
+                <p className="text-white text-base leading-snug" style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontWeight: 700 }}>
+                  &ldquo;{g.funnyOneLiner}&rdquo;
+                </p>
+              </div>
+
+              {/* Share caption */}
+              <div
+                className="p-4 text-center"
+                style={{
+                  background: "var(--ink)",
+                  transform: "rotate(1deg)",
+                  boxShadow: "3px 4px 8px rgba(0,0,0,0.2)",
+                }}
+              >
+                <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "var(--pink-page)" }}>
+                  📲 send to the girls!
+                </p>
+                <p className="text-white font-black text-sm">{g.shareableCaption}</p>
+              </div>
+
+              <p className="text-center handwritten text-base text-gray-400 pt-2">
+                shouldidatethisman.com • built by girls, for girls 💅
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Action bar */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pb-10 w-full">
+          <button onClick={handleDownload} disabled={downloading} className="sticker cursor-pointer hover:bg-gray-50 justify-center py-3 text-sm">
+            <Download className="w-4 h-4" />
+            {downloading ? "Saving..." : "Save"}
+          </button>
+          <button onClick={handleCopy} className="sticker cursor-pointer hover:bg-gray-50 justify-center py-3 text-sm">
+            {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+            {copied ? "Copied!" : "Copy link"}
+          </button>
+          <button onClick={handleShare} className="sticker cursor-pointer hover:bg-gray-50 justify-center py-3 text-sm">
+            <Share2 className="w-4 h-4" />
+            Share
+          </button>
+          <button onClick={onReset} className="sticker cursor-pointer hover:bg-gray-50 justify-center py-3 text-sm">
+            <RefreshCw className="w-4 h-4" />
+            Roast another
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -322,9 +446,9 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
           {/* Score */}
           <div className="text-center space-y-3 py-4">
             <div className="mb-20">
-              <ScoreStamp score={report.dateabilityScore} />
+              <ScoreStamp score={report.dateabilityScore} archetype={report.archetypeLabel} />
             </div>
-            <p className="burn-heading text-lg text-gray-900">{getScoreTier(report.dateabilityScore).subtitle}</p>
+            <p className="burn-heading text-lg text-gray-900">{getScoreTier(report.dateabilityScore, report.archetypeLabel).subtitle}</p>
             <p className="handwritten text-xl text-gray-600">{report.verdict}</p>
           </div>
 
@@ -343,29 +467,68 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
           </div>
 
           {/* Fictional lookalike */}
-          {report.fictionalLookalike && (
-            <div
-              className="p-4"
-              style={{
-                background: "var(--paper)",
-                borderLeft: "5px solid var(--pink-bg)",
-                transform: "rotate(-0.6deg)",
-                boxShadow: "1px 2px 4px rgba(0,0,0,0.1)",
-              }}
-            >
-              <p className="burn-heading text-lg text-gray-900 mb-3">🎭 Fictional Lookalike</p>
-              <div className="flex gap-4 items-center">
-                <CharacterImage name={report.fictionalLookalike.actor || report.fictionalLookalike.character} />
-                <div>
-                  <p className="font-black text-gray-900 text-base">
-                    {report.fictionalLookalike.character}
-                  </p>
-                  <p className="text-xs text-gray-500">{report.fictionalLookalike.source}</p>
-                  <p className="handwritten text-base mt-1" style={{ color: "var(--pink-burn)" }}>
-                    {report.fictionalLookalike.reason}
-                  </p>
+          {/* Lookalike + Meme side by side */}
+          {(report.fictionalLookalike || memeUrl) && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
+              {/* Fictional Lookalike */}
+              {report.fictionalLookalike && (
+                <div
+                  className="p-5 flex flex-col"
+                  style={{
+                    background: "var(--paper)",
+                    border: "3px solid white",
+                    transform: "rotate(-0.6deg)",
+                    boxShadow: "2px 3px 8px rgba(0,0,0,0.12)",
+                  }}
+                >
+                  <p className="burn-heading text-lg text-gray-900 mb-3">🎭 Fictional Lookalike</p>
+                  <div className="flex-1 flex flex-col items-center justify-center text-center gap-3">
+                    <CharacterImage name={report.fictionalLookalike.actor || report.fictionalLookalike.character} />
+                    <div>
+                      <p className="font-black text-gray-900 text-xl">
+                        {report.fictionalLookalike.character}
+                      </p>
+                      <p className="text-sm text-gray-500">{report.fictionalLookalike.source}</p>
+                      <p className="handwritten text-base mt-2" style={{ color: "var(--pink-burn)" }}>
+                        {report.fictionalLookalike.reason}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* AI Meme */}
+              {memeUrl && (
+                <div
+                  className="p-5 flex flex-col"
+                  style={{
+                    background: "var(--paper)",
+                    border: "3px solid white",
+                    transform: "rotate(0.6deg)",
+                    boxShadow: "2px 3px 8px rgba(0,0,0,0.12)",
+                  }}
+                >
+                  <p className="burn-heading text-lg text-gray-900 mb-3">🔮 Memelord Says</p>
+                  <div className="flex-1 flex flex-col items-center justify-center">
+                    <div
+                      className="w-full"
+                      style={{
+                        background: "white",
+                        border: "3px solid white",
+                        boxShadow: "1px 2px 6px rgba(0,0,0,0.1)",
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={memeUrl}
+                        alt="AI generated meme"
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-[9px] text-gray-300 mt-2 text-center italic">ai meme via memelord ✨</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -501,28 +664,6 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
             <p className="handwritten text-lg text-gray-800 leading-relaxed">{report.roastSummary}</p>
           </div>
 
-          {/* AI Meme */}
-          {memeUrl && (
-            <div
-              className="text-center"
-              style={{
-                transform: "rotate(0.8deg)",
-                boxShadow: "2px 3px 6px rgba(0,0,0,0.15)",
-              }}
-            >
-              <div className="p-3 pb-1" style={{ background: "var(--paper-dark)" }}>
-                <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">mood rn</p>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={memeUrl}
-                  alt="AI generated meme"
-                  className="w-full rounded"
-                  style={{ border: "3px solid white" }}
-                />
-              </div>
-            </div>
-          )}
-
           {/* Share caption */}
           <div
             className="p-4 text-center"
@@ -533,34 +674,34 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
             }}
           >
             <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "var(--pink-page)" }}>
-              📲 send to the group chat
+              📲 send to the girls!
             </p>
             <p className="text-white font-black text-sm">{report.shareableCaption}</p>
           </div>
 
           <p className="text-center handwritten text-base text-gray-400 pt-2">
-            shouldidatethisman.com • for entertainment only 💅
+            shouldidatethisman.com • built by girls, for girls 💅
           </p>
         </div>
         </div>{/* close scrapbook-card */}
       </div>{/* close ref wrapper */}
 
       {/* Action bar */}
-      <div className="flex gap-2 flex-wrap items-center justify-center pb-10">
-        <button onClick={handleDownload} disabled={downloading} className="sticker cursor-pointer hover:bg-gray-50">
-          <Download className="w-3 h-3" />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pb-10 w-full">
+        <button onClick={handleDownload} disabled={downloading} className="sticker cursor-pointer hover:bg-gray-50 justify-center py-3 text-sm">
+          <Download className="w-4 h-4" />
           {downloading ? "Saving..." : "Save"}
         </button>
-        <button onClick={handleCopy} className="sticker cursor-pointer hover:bg-gray-50">
-          {copied ? <Check className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3" />}
+        <button onClick={handleCopy} className="sticker cursor-pointer hover:bg-gray-50 justify-center py-3 text-sm">
+          {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
           {copied ? "Copied!" : "Copy link"}
         </button>
-        <button onClick={handleShare} className="sticker cursor-pointer hover:bg-gray-50">
-          <Share2 className="w-3 h-3" />
+        <button onClick={handleShare} className="sticker cursor-pointer hover:bg-gray-50 justify-center py-3 text-sm">
+          <Share2 className="w-4 h-4" />
           Share
         </button>
-        <button onClick={onReset} className="sticker cursor-pointer hover:bg-gray-50">
-          <RefreshCw className="w-3 h-3" />
+        <button onClick={onReset} className="sticker cursor-pointer hover:bg-gray-50 justify-center py-3 text-sm">
+          <RefreshCw className="w-4 h-4" />
           Roast another
         </button>
       </div>

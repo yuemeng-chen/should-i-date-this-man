@@ -46,6 +46,8 @@ export interface DatingAuditReport {
   funnyOneLiner: string;
   archetypeLabel: string;
   shareableCaption: string;
+  memeCaption?: string;
+  supportMode?: boolean;
 }
 
 export interface RoastResponse {
