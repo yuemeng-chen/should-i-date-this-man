@@ -546,7 +546,7 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
                       <img
                         src={memeUrl}
                         alt="AI generated meme"
-                        className="w-full"
+                        className="w-full object-cover aspect-square"
                       />
                     </div>
                   </div>

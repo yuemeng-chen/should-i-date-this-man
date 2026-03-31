@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { RoastRequest } from "@/types";
-import { Paperclip, X, Upload } from "lucide-react";
+import { Paperclip, X, Upload, Info } from "lucide-react";
 
 function compressImage(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -46,6 +46,7 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [imageBase64s, setImageBase64s] = useState<string[]>([]);
   const [dragOver, setDragOver] = useState(false);
+  const [showWhyInfo, setShowWhyInfo] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -175,12 +176,31 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
           </div>
         )}
 
+        {/* Tip */}
+        <div className="px-5 pt-3 pb-2 flex items-center gap-1.5">
+          <p className="text-[11px] text-gray-400">
+            📸 screenshots &gt; links · more receipts = better roast
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowWhyInfo(!showWhyInfo)}
+            className="shrink-0"
+          >
+            <Info className="w-3 h-3 text-gray-300 hover:text-gray-500 transition-colors" />
+          </button>
+        </div>
+        {showWhyInfo && (
+          <p className="px-5 text-[10px] text-gray-400 leading-relaxed">
+            most apps block link scraping — screenshots give us his photos, bio, the whole vibe 🔒
+          </p>
+        )}
+
         {/* Textarea */}
         <textarea
           ref={textareaRef}
-          className="burn-input w-full p-5 pl-6 min-h-[160px] resize-none border-none shadow-none"
+          className="burn-input w-full p-5 pl-6 min-h-[140px] resize-none border-none shadow-none"
           style={{ boxShadow: "none", border: "none", background: uploadedImages.length > 0 ? "transparent" : undefined }}
-          placeholder="spill the tea... paste his bio, dating app profile, linkedin, whatever receipts you have"
+          placeholder="spill the tea... paste his bio, texts, anything you got on him"
           value={infoText}
           onChange={(e) => setInfoText(e.target.value)}
           onPaste={handlePaste}
