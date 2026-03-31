@@ -248,10 +248,34 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const inlineExternalImages = async (container: HTMLElement) => {
+    const imgs = container.querySelectorAll("img");
+    await Promise.all(
+      Array.from(imgs).map(async (img) => {
+        if (!img.src || img.src.startsWith("data:") || img.src.startsWith(window.location.origin)) return;
+        try {
+          const res = await fetch(img.src);
+          const blob = await res.blob();
+          const dataUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+          img.src = dataUrl;
+        } catch {
+          // silently skip — image just won't appear in screenshot
+        }
+      })
+    );
+  };
+
   const handleDownload = async () => {
     if (!reportRef.current) return;
     setDownloading(true);
     try {
+      // Convert external images to data URLs so they appear in the screenshot
+      await inlineExternalImages(reportRef.current);
+
       // Reveal the hidden banner for the screenshot
       const banner = reportRef.current.querySelector("[data-png-banner]") as HTMLElement | null;
       if (banner) {

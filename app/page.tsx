@@ -121,7 +121,7 @@ export default function Home() {
         <div className="text-center mb-8">
           <RansomTitle />
           <p className="handwritten text-2xl text-white" style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.3)" }}>
-            tell the burn book everything you know about him 💋
+            let it out, honey. write in the book. 💋
           </p>
         </div>
 
