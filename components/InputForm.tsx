@@ -181,7 +181,7 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
           ref={textareaRef}
           className="burn-input w-full p-5 pl-6 min-h-[160px] resize-none border-none shadow-none"
           style={{ boxShadow: "none", border: "none", background: uploadedImages.length > 0 ? "transparent" : undefined }}
-          placeholder="spill the tea... paste his bio, texts, anything you got on him. more receipts = better roast 💅"
+          placeholder="spill the tea... paste/upload his bio, texts, hinge, linkedin, resume (sky's the limit), anything you got on him. more receipts = better roast 💅"
           value={infoText}
           onChange={(e) => setInfoText(e.target.value)}
           onPaste={handlePaste}
@@ -207,7 +207,7 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
               <Paperclip className="w-3.5 h-3.5 shrink-0" />
               {uploadedImages.length > 0
                 ? `${uploadedImages.length}/6 files`
-                : "screenshots work best · drop or upload"}
+                : "drop or upload · screenshots work best"}
             </button>
             <button
               type="button"
