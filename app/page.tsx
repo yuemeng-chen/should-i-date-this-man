@@ -88,7 +88,7 @@ export default function Home() {
         document.getElementById("results")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 100);
     } catch {
-      setError("Network error. Check your connection and try again.");
+      setError("Upload too large or network error — try fewer screenshots (3-4 is the sweet spot) or check your connection 📸");
     } finally {
       setIsLoading(false);
     }

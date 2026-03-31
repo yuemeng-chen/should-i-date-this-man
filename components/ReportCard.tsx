@@ -226,7 +226,9 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
       Array.from(imgs).map(async (img) => {
         if (!img.src || img.src.startsWith("data:") || img.src.startsWith(window.location.origin)) return;
         try {
-          const res = await fetch(img.src);
+          // Route through our proxy to avoid CORS issues on mobile
+          const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(img.src)}`;
+          const res = await fetch(proxyUrl);
           const blob = await res.blob();
           const dataUrl = await new Promise<string>((resolve) => {
             const reader = new FileReader();

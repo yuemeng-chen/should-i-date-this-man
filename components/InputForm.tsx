@@ -4,11 +4,14 @@ import { useState, useRef } from "react";
 import { RoastRequest } from "@/types";
 import { Paperclip, X, Info } from "lucide-react";
 
-function compressImage(file: File): Promise<string> {
+function compressImage(file: File, totalImages: number): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
-      const MAX_DIM = 1200;
+      // Scale down more aggressively when uploading multiple images
+      // to stay under Vercel's 4.5MB body size limit
+      const MAX_DIM = totalImages > 3 ? 800 : totalImages > 1 ? 1000 : 1200;
+      const quality = totalImages > 3 ? 0.6 : 0.7;
       let { width, height } = img;
 
       if (width > MAX_DIM || height > MAX_DIM) {
@@ -28,7 +31,7 @@ function compressImage(file: File): Promise<string> {
       if (!ctx) return reject(new Error("Could not get canvas context"));
 
       ctx.drawImage(img, 0, 0, width, height);
-      const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+      const dataUrl = canvas.toDataURL("image/jpeg", quality);
       resolve(dataUrl);
     };
     img.onerror = () => reject(new Error("Failed to load image"));
@@ -84,7 +87,8 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
       }
 
       if (!file.type.startsWith("image/")) continue;
-      const base64 = await compressImage(file);
+      const totalImages = uploadedImages.length + newBase64s.length + 1;
+      const base64 = await compressImage(file, totalImages);
       newBase64s.push(base64);
       newPreviews.push(URL.createObjectURL(file));
     }
