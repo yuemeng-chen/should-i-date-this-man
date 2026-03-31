@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { DatingAuditReport, RoastRequest } from "@/types";
+import { DatingAuditReport } from "@/types";
 import { getSeverityEmoji } from "@/lib/utils";
 import { Download, Copy, Check, RefreshCw, Share2 } from "lucide-react";
 
@@ -53,7 +53,7 @@ interface ReportCardProps {
   shareSlug?: string;
   memeUrl?: string;
   onReset: () => void;
-  originalRequest?: RoastRequest;
+  originalRequest?: unknown;
 }
 
 function PngRansomTitle() {
@@ -195,34 +195,6 @@ function ScoreStamp({ score, archetype }: { score: number; archetype?: string })
   );
 }
 
-function InputSummary({ request }: { request: RoastRequest }) {
-  const hasText = !!request.profileText;
-  const imageCount = request.imageBase64s?.length ?? (request.imageBase64 ? 1 : 0);
-  const textPreview = request.profileText
-    ? request.profileText.length > 150
-      ? request.profileText.slice(0, 150) + "..."
-      : request.profileText
-    : null;
-
-  return (
-    <div
-      className="scrapbook-card p-4 mb-4"
-      style={{ background: "var(--paper-dark)", transform: "rotate(0.3deg)" }}
-    >
-      <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">the evidence</p>
-      {textPreview && (
-        <p className="handwritten text-lg text-gray-700 leading-snug">
-          &ldquo;{textPreview}&rdquo;
-        </p>
-      )}
-      {imageCount > 0 && (
-        <p className="handwritten text-base text-gray-500 mt-1">
-          📸 + {imageCount} screenshot{imageCount > 1 ? "s" : ""}
-        </p>
-      )}
-    </div>
-  );
-}
 
 const GIRL_REPORT = {
   archetypeLabel: "✨ Out of His League",

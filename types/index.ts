@@ -49,8 +49,3 @@ export interface DatingAuditReport {
   memeCaption?: string;
   supportMode?: boolean;
 }
-
-export interface RoastResponse {
-  report: DatingAuditReport;
-  raw: string;
-}

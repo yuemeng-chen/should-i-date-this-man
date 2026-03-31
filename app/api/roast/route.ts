@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
 
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
-      max_tokens: 4096,
+      max_tokens: 1500,
       system: ROAST_SYSTEM_PROMPT,
       messages: [{ role: "user", content }],
     });
@@ -200,11 +200,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate a meme (best effort, non-blocking) — skip for girl profiles & support mode
+    // Run meme generation + Supabase save in parallel (both best-effort)
     const skipMeme = (report.dateabilityScore >= 90 && report.redFlags.length === 0) || report.supportMode;
-    let memeUrl: string | undefined;
     const memelordKey = process.env.MEMELORD_API_KEY;
-    if (memelordKey && !skipMeme) {
+
+    const memePromise = (memelordKey && !skipMeme) ? (async () => {
       try {
         const topFlag = report.redFlags?.[0]?.roast ?? "";
         const memePrompt = `girl roasting a guy's dating profile from a woman's perspective: he's a ${report.archetypeLabel}. ${topFlag}. ${report.funnyOneLiner}. Make it from HER point of view, not his.`;
@@ -216,20 +216,19 @@ export async function POST(request: NextRequest) {
           },
           body: JSON.stringify({ prompt: memePrompt, count: 1, include_nsfw: false }),
         });
-        const memeData = await memeRes.json();
-        console.log("Memelord response:", JSON.stringify(memeData, null, 2));
         if (memeRes.ok) {
-          memeUrl = memeData?.results?.[0]?.url;
-        } else {
-          console.error("Memelord error:", memeRes.status, memeData);
+          const memeData = await memeRes.json();
+          return memeData?.results?.[0]?.url as string | undefined;
         }
       } catch (e) {
         console.error("Meme generation failed:", e);
       }
-    }
+      return undefined;
+    })() : Promise.resolve(undefined);
 
-    // Save to Supabase (non-blocking, best effort)
-    const saved = await saveReport(body, report);
+    const savePromise = saveReport(body, report).catch(() => null);
+
+    const [memeUrl, saved] = await Promise.all([memePromise, savePromise]);
 
     return NextResponse.json({
       report,

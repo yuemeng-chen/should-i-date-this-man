@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { RoastRequest } from "@/types";
-import { Paperclip, X, Upload, Info } from "lucide-react";
+import { Paperclip, X, Info } from "lucide-react";
 
 function compressImage(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -130,12 +130,11 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
     }
   };
 
-  const hasLinkedInUrlOnly =
-    /linkedin\.com\/in\//.test(infoText) &&
-    infoText.replace(/https?:\/\/[^\s]+/g, "").trim().length < 20 &&
-    imageBase64s.length === 0;
+  const hasUrl = /https?:\/\/[^\s]+/.test(infoText);
+  const textWithoutUrls = infoText.replace(/https?:\/\/[^\s]+/g, "").trim();
+  const hasUrlOnly = hasUrl && textWithoutUrls.length < 20 && imageBase64s.length === 0;
 
-  const canSubmit = (infoText.trim().length > 0 || imageBase64s.length > 0) && !isLoading && !hasLinkedInUrlOnly;
+  const canSubmit = (infoText.trim().length > 0 || imageBase64s.length > 0) && !isLoading && !hasUrlOnly;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -242,11 +241,11 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
         onChange={(e) => { if (e.target.files) handleFileUpload(e.target.files); }}
       />
 
-      {hasLinkedInUrlOnly && (
+      {hasUrlOnly && (
         <div className="scrapbook-card p-4 tilt-left" style={{ background: "var(--paper-dark)" }}>
-          <p className="handwritten text-lg text-gray-900 mb-1">📋 linkedin blocks bots bestie</p>
+          <p className="handwritten text-lg text-gray-900 mb-1">🔗 links don&apos;t work bestie</p>
           <p className="text-xs text-gray-600 leading-relaxed">
-            Open his profile → click <strong>see more</strong> on the About section → copy-paste his headline, bio, and job titles here.
+            most sites block us from reading links. screenshot his profile and upload it instead — we&apos;ll get way more tea that way 📸
           </p>
         </div>
       )}

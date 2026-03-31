@@ -20,6 +20,13 @@ export const metadata: Metadata = {
     description:
       "Get a brutally honest AI audit of any man's dating profile, LinkedIn, or resume. Red flags, green flags, and a full roast included.",
     type: "website",
+    images: [{ url: "/og.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "💋 Should I Date This Man?",
+    description: "AI-powered dating profile roast. Built by girls, for girls.",
+    images: ["/og.png"],
   },
 };
 
