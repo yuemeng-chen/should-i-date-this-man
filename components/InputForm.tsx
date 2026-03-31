@@ -176,31 +176,12 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
           </div>
         )}
 
-        {/* Tip */}
-        <div className="px-5 pt-3 pb-2 flex items-center gap-1.5">
-          <p className="text-[11px] text-gray-400">
-            📸 screenshots &gt; links · more receipts = better roast
-          </p>
-          <button
-            type="button"
-            onClick={() => setShowWhyInfo(!showWhyInfo)}
-            className="shrink-0"
-          >
-            <Info className="w-3 h-3 text-gray-300 hover:text-gray-500 transition-colors" />
-          </button>
-        </div>
-        {showWhyInfo && (
-          <p className="px-5 text-[10px] text-gray-400 leading-relaxed">
-            most apps block link scraping — screenshots give us his photos, bio, the whole vibe 🔒
-          </p>
-        )}
-
         {/* Textarea */}
         <textarea
           ref={textareaRef}
-          className="burn-input w-full p-5 pl-6 min-h-[140px] resize-none border-none shadow-none"
+          className="burn-input w-full p-5 pl-6 min-h-[160px] resize-none border-none shadow-none"
           style={{ boxShadow: "none", border: "none", background: uploadedImages.length > 0 ? "transparent" : undefined }}
-          placeholder="spill the tea... paste his bio, texts, anything you got on him"
+          placeholder="spill the tea... paste his bio, texts, anything you got on him. more receipts = better roast 💅"
           value={infoText}
           onChange={(e) => setInfoText(e.target.value)}
           onPaste={handlePaste}
@@ -208,25 +189,39 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
         />
 
         {/* Bottom toolbar */}
-        <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200" style={{ background: "var(--paper-dark)" }}>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 hover:underline transition-all"
-            style={{
-              background: "transparent",
-              color: "var(--pink-burn)",
-              fontWeight: 600,
-              fontSize: "13px",
-              border: "none",
-            }}
-            disabled={uploadedImages.length >= 6}
-          >
-            <Paperclip className="w-4 h-4 shrink-0" />
-            {uploadedImages.length > 0
-              ? `${uploadedImages.length}/6 files`
-              : "drag & drop or upload any proof you have"}
-          </button>
+        <div className="relative flex items-center justify-between px-4 py-4 border-t border-gray-200" style={{ background: "var(--paper-dark)" }}>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2 hover:underline transition-all"
+              style={{
+                background: "transparent",
+                color: "var(--pink-burn)",
+                fontWeight: 600,
+                fontSize: "13px",
+                border: "none",
+              }}
+              disabled={uploadedImages.length >= 6}
+            >
+              <Paperclip className="w-3.5 h-3.5 shrink-0" />
+              {uploadedImages.length > 0
+                ? `${uploadedImages.length}/6 files`
+                : "screenshots work best · drop or upload"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowWhyInfo(!showWhyInfo)}
+              className="shrink-0 flex items-center justify-center w-5 h-5 rounded-full border border-gray-300 hover:border-gray-500 hover:bg-gray-100 transition-all"
+            >
+              <Info className="w-3 h-3 text-gray-400" />
+            </button>
+          </div>
+          {showWhyInfo && (
+            <p className="absolute bottom-full left-4 mb-1 text-[10px] text-gray-500 bg-white rounded px-2 py-1 shadow-sm border border-gray-100">
+              links usually don&apos;t work — most apps block scraping. screenshots give us the full picture 🔒
+            </p>
+          )}
 
           <button
             type="submit"
