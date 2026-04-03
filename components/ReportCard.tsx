@@ -295,19 +295,6 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
   const handleShare = async () => {
     const url = shareSlug ? `${window.location.origin}/share/${shareSlug}` : window.location.href;
     if (navigator.share) {
-      try {
-        // Try sharing with the image + link
-        const blob = await generateImage();
-        if (blob) {
-          const file = new File([blob], `burn-book-${report.dateabilityScore}.png`, { type: "image/png" });
-          if (navigator.canShare?.({ files: [file] })) {
-            await navigator.share({ title: "Should I Date This Man?", text: `${report.shareableCaption}\n${url}`, files: [file] });
-            return;
-          }
-        }
-      } catch {
-        // Fall through to link-only share
-      }
       await navigator.share({ title: "Should I Date This Man?", text: report.shareableCaption, url });
     } else {
       handleCopy();
