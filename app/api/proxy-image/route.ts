@@ -6,13 +6,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Missing url param" }, { status: 400 });
   }
 
-  // Only allow image URLs from known domains
-  const allowed = ["upload.wikimedia.org", "en.wikipedia.org", "memelord.com", "www.memelord.com"];
   try {
-    const parsed = new URL(url);
-    if (!allowed.some((d) => parsed.hostname.endsWith(d))) {
-      return NextResponse.json({ error: "Domain not allowed" }, { status: 403 });
-    }
+    new URL(url);
   } catch {
     return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
   }
@@ -23,7 +18,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Failed to fetch" }, { status: 502 });
     }
     const contentType = res.headers.get("content-type") ?? "image/jpeg";
+
+    // Only proxy actual images
+    if (!contentType.startsWith("image/")) {
+      return NextResponse.json({ error: "Not an image" }, { status: 403 });
+    }
+
     const buffer = await res.arrayBuffer();
+
+    // Reject suspiciously large files (10MB max)
+    if (buffer.byteLength > 10 * 1024 * 1024) {
+      return NextResponse.json({ error: "Image too large" }, { status: 413 });
+    }
 
     return new NextResponse(buffer, {
       headers: {
