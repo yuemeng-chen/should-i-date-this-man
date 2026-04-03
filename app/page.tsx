@@ -56,6 +56,7 @@ export default function Home() {
   const [report, setReport] = useState<DatingAuditReport | null>(null);
   const [shareSlug, setShareSlug] = useState<string | undefined>();
   const [memeUrl, setMemeUrl] = useState<string | undefined>();
+  const [memeLoading, setMemeLoading] = useState(false);
   const [lastRequest, setLastRequest] = useState<RoastRequest | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +65,8 @@ export default function Home() {
     setIsLoading(true);
     setError(null);
     setReport(null);
+    setMemeUrl(undefined);
+    setMemeLoading(false);
     setLastRequest(request);
 
     try {
@@ -94,11 +97,31 @@ export default function Home() {
 
       setReport(data.report);
       setShareSlug(data.shareSlug);
-      setMemeUrl(data.memeUrl);
+      setMemeUrl(undefined);
 
       setTimeout(() => {
         document.getElementById("results")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 100);
+
+      // Fetch meme in background (non-blocking)
+      if (!data.skipMeme) {
+        setMemeLoading(true);
+        fetch("/api/meme", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            archetypeLabel: data.report.archetypeLabel,
+            topRoast: data.report.redFlags?.[0]?.roast ?? "",
+            oneLiner: data.report.funnyOneLiner,
+          }),
+        })
+          .then((res) => res.json())
+          .then((memeData) => {
+            if (memeData.memeUrl) setMemeUrl(memeData.memeUrl);
+          })
+          .catch(() => {})
+          .finally(() => setMemeLoading(false));
+      }
     } catch {
       setError("Network error — check your connection and try again.");
     } finally {
@@ -152,7 +175,7 @@ export default function Home() {
         {report && !isLoading && (
           <div id="results" className="slide-up">
             <ErrorBoundary onReset={handleReset}>
-              <ReportCard report={report} shareSlug={shareSlug} memeUrl={memeUrl} onReset={handleReset} originalRequest={lastRequest ?? undefined} />
+              <ReportCard report={report} shareSlug={shareSlug} memeUrl={memeUrl} memeLoading={memeLoading} onReset={handleReset} originalRequest={lastRequest ?? undefined} />
             </ErrorBoundary>
           </div>
         )}

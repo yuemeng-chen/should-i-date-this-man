@@ -52,6 +52,7 @@ interface ReportCardProps {
   report: DatingAuditReport;
   shareSlug?: string;
   memeUrl?: string;
+  memeLoading?: boolean;
   onReset: () => void;
   originalRequest?: unknown;
 }
@@ -180,11 +181,14 @@ function getScoreTier(score: number, archetype?: string) {
 
 function ScoreStamp({ score, archetype }: { score: number; archetype?: string }) {
   const { color, stamp: label } = getScoreTier(score, archetype);
+  // Scale font down for longer stamp labels
+  const len = label.length;
+  const stampSize = len > 15 ? "clamp(1.4rem, 5vw, 2.5rem)" : len > 8 ? "clamp(1.8rem, 7vw, 3.5rem)" : "clamp(2.5rem, 10vw, 4.5rem)";
   return (
-    <div className="relative inline-flex items-center justify-center">
+    <div className="relative inline-flex items-center justify-center" style={{ marginBottom: "3rem" }}>
       <div
         className="stamp"
-        style={{ color, borderColor: color, fontSize: "clamp(2.5rem, 10vw, 4.5rem)", opacity: 0.8 }}
+        style={{ color, borderColor: color, fontSize: stampSize, opacity: 0.8 }}
       >
         {label}
       </div>
@@ -208,7 +212,7 @@ function isGirlProfile(report: DatingAuditReport): boolean {
   return GIRL_ARCHETYPES.includes(report.archetypeLabel);
 }
 
-export default function ReportCard({ report, shareSlug, memeUrl, onReset, originalRequest }: ReportCardProps) {
+export default function ReportCard({ report, shareSlug, memeUrl, memeLoading, onReset, originalRequest }: ReportCardProps) {
   const reportRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -535,8 +539,8 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
 
           {/* Fictional lookalike */}
           {/* Lookalike + Meme side by side */}
-          {(report.fictionalLookalike || memeUrl) && (
-            <div className={`grid grid-cols-1 ${memeUrl && report.fictionalLookalike ? 'sm:grid-cols-2' : ''} gap-4 items-stretch`}>
+          {(report.fictionalLookalike || memeUrl || memeLoading) && (
+            <div className={`grid grid-cols-1 ${(memeUrl || memeLoading) && report.fictionalLookalike ? 'sm:grid-cols-2' : ''} gap-4 items-stretch`}>
               {/* Fictional Lookalike */}
               {report.fictionalLookalike && (
                 <div
@@ -596,6 +600,25 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
                     </div>
                   </div>
                   <p className="text-[9px] text-gray-300 mt-2 text-center italic">ai meme via memelord ✨</p>
+                </div>
+              )}
+              {/* Meme loading state */}
+              {memeLoading && !memeUrl && (
+                <div
+                  className="p-5 flex flex-col items-center justify-center"
+                  style={{
+                    background: "var(--paper)",
+                    border: "3px solid white",
+                    transform: "rotate(0.6deg)",
+                    boxShadow: "2px 3px 8px rgba(0,0,0,0.12)",
+                    minHeight: 200,
+                  }}
+                >
+                  <p className="burn-heading text-lg text-gray-900 mb-3">🔮 Memelord Says</p>
+                  <div className="flex-1 flex flex-col items-center justify-center gap-2">
+                    <span className="text-2xl animate-bounce">🎨</span>
+                    <p className="handwritten text-sm text-gray-400">cooking up a meme...</p>
+                  </div>
                 </div>
               )}
             </div>

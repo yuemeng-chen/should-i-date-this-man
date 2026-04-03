@@ -210,43 +210,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Run meme generation + Supabase save in parallel (both best-effort)
+    // Save to Supabase (best-effort, don't block response)
+    const saved = await saveReport(body, report).catch(() => null);
+
+    // Whether the client should fetch a meme separately
     const skipMeme = (report.dateabilityScore >= 90 && report.redFlags.length === 0) || report.supportMode;
-    const memelordKey = process.env.MEMELORD_API_KEY;
-
-    const memePromise = (memelordKey && !skipMeme) ? (async () => {
-      try {
-        const topFlag = report.redFlags?.[0]?.roast ?? "";
-        const memePrompt = `girl roasting a guy's dating profile from a woman's perspective: he's a ${report.archetypeLabel}. ${topFlag}. ${report.funnyOneLiner}. Make it from HER point of view, not his.`;
-        const memeRes = await fetch("https://www.memelord.com/api/v1/ai-meme", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${memelordKey}`,
-          },
-          body: JSON.stringify({ prompt: memePrompt, count: 1, include_nsfw: false }),
-        });
-        if (memeRes.ok) {
-          const memeData = await memeRes.json();
-          return memeData?.results?.[0]?.url as string | undefined;
-        }
-      } catch (e) {
-        console.error("Meme generation failed:", e);
-      }
-      return undefined;
-    })() : Promise.resolve(undefined);
-
-    const savePromise = saveReport(body, report).catch(() => null);
-
-    const [memeUrl, saved] = await Promise.all([memePromise, savePromise]);
 
     const t4 = Date.now();
-    console.log(`[TIMING] Meme + Supabase: ${t4 - t3}ms | Meme: ${memeUrl ? 'yes' : 'no'} | Saved: ${saved ? 'yes' : 'no'}`);
+    console.log(`[TIMING] Supabase: ${t4 - t3}ms | Saved: ${saved ? 'yes' : 'no'}`);
     console.log(`[TIMING] TOTAL: ${t4 - t0}ms`);
 
     return NextResponse.json({
       report,
-      memeUrl,
+      skipMeme,
       shareSlug: saved?.shareSlug,
     });
   } catch (error) {
