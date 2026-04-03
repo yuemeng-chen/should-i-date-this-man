@@ -243,30 +243,48 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
     );
   };
 
+  const generateImage = async (): Promise<Blob | null> => {
+    if (!reportRef.current) return null;
+
+    await inlineExternalImages(reportRef.current);
+
+    const banner = reportRef.current.querySelector("[data-png-banner]") as HTMLElement | null;
+    if (banner) {
+      banner.style.display = "block";
+      banner.style.height = "auto";
+      banner.style.overflow = "visible";
+    }
+    const { toPng } = await import("html-to-image");
+    const dataUrl = await toPng(reportRef.current, { quality: 1, pixelRatio: 2, backgroundColor: "#E8779A" });
+    if (banner) {
+      banner.style.display = "none";
+    }
+
+    const res = await fetch(dataUrl);
+    return res.blob();
+  };
+
   const handleDownload = async () => {
     if (!reportRef.current) return;
     setDownloading(true);
     try {
-      // Convert external images to data URLs so they appear in the screenshot
-      await inlineExternalImages(reportRef.current);
+      const blob = await generateImage();
+      if (!blob) return;
 
-      // Reveal the hidden banner for the screenshot
-      const banner = reportRef.current.querySelector("[data-png-banner]") as HTMLElement | null;
-      if (banner) {
-        banner.style.display = "block";
-        banner.style.height = "auto";
-        banner.style.overflow = "visible";
+      const file = new File([blob], `burn-book-${report.dateabilityScore}.png`, { type: "image/png" });
+
+      // On mobile, use share sheet so users can save to camera roll
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] });
+      } else {
+        // Desktop fallback: regular download
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.download = file.name;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
       }
-      const { toPng } = await import("html-to-image");
-      const dataUrl = await toPng(reportRef.current, { quality: 1, pixelRatio: 2, backgroundColor: "#E8779A" });
-      // Re-hide the banner
-      if (banner) {
-        banner.style.display = "none";
-      }
-      const link = document.createElement("a");
-      link.download = `burn-book-${report.dateabilityScore}.png`;
-      link.href = dataUrl;
-      link.click();
     } catch (e) {
       console.error(e);
     } finally {
@@ -277,6 +295,19 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
   const handleShare = async () => {
     const url = shareSlug ? `${window.location.origin}/share/${shareSlug}` : window.location.href;
     if (navigator.share) {
+      try {
+        // Try sharing with the image + link
+        const blob = await generateImage();
+        if (blob) {
+          const file = new File([blob], `burn-book-${report.dateabilityScore}.png`, { type: "image/png" });
+          if (navigator.canShare?.({ files: [file] })) {
+            await navigator.share({ title: "Should I Date This Man?", text: `${report.shareableCaption}\n${url}`, files: [file] });
+            return;
+          }
+        }
+      } catch {
+        // Fall through to link-only share
+      }
       await navigator.share({ title: "Should I Date This Man?", text: report.shareableCaption, url });
     } else {
       handleCopy();
