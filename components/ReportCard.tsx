@@ -225,19 +225,28 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
     await Promise.all(
       Array.from(imgs).map(async (img) => {
         if (!img.src || img.src.startsWith("data:") || img.src.startsWith(window.location.origin)) return;
+        const originalSrc = img.src;
         try {
-          // Try proxy first (avoids CORS on mobile), then direct fetch as fallback
+          // Try direct fetch first (works for Wikipedia which has CORS headers)
           let blob: Blob | null = null;
-          const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(img.src)}`;
-          const proxyRes = await fetch(proxyUrl);
-          if (proxyRes.ok && (proxyRes.headers.get("content-type") ?? "").startsWith("image/")) {
-            blob = await proxyRes.blob();
-          } else {
-            // Fallback: direct fetch (works on desktop, may fail on mobile CORS)
+          try {
             const directRes = await fetch(img.src);
             if (directRes.ok) blob = await directRes.blob();
+          } catch {
+            // CORS blocked — try proxy as fallback
           }
-          if (!blob) return;
+          if (!blob) {
+            const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(originalSrc)}`;
+            const proxyRes = await fetch(proxyUrl);
+            if (proxyRes.ok && (proxyRes.headers.get("content-type") ?? "").startsWith("image/")) {
+              blob = await proxyRes.blob();
+            }
+          }
+          if (!blob || blob.type === "application/json") {
+            // Mark as failed so generateImage can hide it
+            img.dataset.inlineFailed = "true";
+            return;
+          }
           const dataUrl = await new Promise<string>((resolve) => {
             const reader = new FileReader();
             reader.onloadend = () => resolve(reader.result as string);
@@ -245,7 +254,7 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
           });
           img.src = dataUrl;
         } catch {
-          // silently skip — image just won't appear in screenshot
+          img.dataset.inlineFailed = "true";
         }
       })
     );
@@ -254,16 +263,17 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
   const generateImage = async (): Promise<Blob | null> => {
     if (!reportRef.current) return null;
 
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    await inlineExternalImages(reportRef.current);
 
-    // On mobile, hide image containers entirely (CORS prevents inlining)
-    // On desktop, try to inline external images
-    const imgContainers = Array.from(reportRef.current.querySelectorAll("[data-img-container]"));
-    if (isMobile) {
-      imgContainers.forEach((el) => { (el as HTMLElement).style.display = "none"; });
-    } else {
-      await inlineExternalImages(reportRef.current);
-    }
+    // Hide containers where images failed to inline
+    const hiddenContainers: HTMLElement[] = [];
+    reportRef.current.querySelectorAll("img[data-inline-failed]").forEach((img) => {
+      const container = img.closest("[data-img-container]") as HTMLElement | null;
+      if (container) {
+        container.style.display = "none";
+        hiddenContainers.push(container);
+      }
+    });
 
     // Simplify the stamp for screenshot — html-to-image can't render
     // mask-image, background-clip, or SVG filters
@@ -295,9 +305,11 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
       stamp.setAttribute("style", stampOriginalStyle);
     }
     // Restore hidden image containers
-    if (isMobile) {
-      imgContainers.forEach((el) => { (el as HTMLElement).style.display = ""; });
-    }
+    hiddenContainers.forEach((el) => { el.style.display = ""; });
+    // Clean up inline-failed markers
+    reportRef.current.querySelectorAll("img[data-inline-failed]").forEach((img) => {
+      delete (img as HTMLImageElement).dataset.inlineFailed;
+    });
 
     const res = await fetch(dataUrl);
     return res.blob();
