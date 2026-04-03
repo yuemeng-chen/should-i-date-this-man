@@ -226,10 +226,18 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
       Array.from(imgs).map(async (img) => {
         if (!img.src || img.src.startsWith("data:") || img.src.startsWith(window.location.origin)) return;
         try {
-          // Route through our proxy to avoid CORS issues on mobile
+          // Try proxy first (avoids CORS on mobile), then direct fetch as fallback
+          let blob: Blob | null = null;
           const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(img.src)}`;
-          const res = await fetch(proxyUrl);
-          const blob = await res.blob();
+          const proxyRes = await fetch(proxyUrl);
+          if (proxyRes.ok && (proxyRes.headers.get("content-type") ?? "").startsWith("image/")) {
+            blob = await proxyRes.blob();
+          } else {
+            // Fallback: direct fetch (works on desktop, may fail on mobile CORS)
+            const directRes = await fetch(img.src);
+            if (directRes.ok) blob = await directRes.blob();
+          }
+          if (!blob) return;
           const dataUrl = await new Promise<string>((resolve) => {
             const reader = new FileReader();
             reader.onloadend = () => resolve(reader.result as string);
