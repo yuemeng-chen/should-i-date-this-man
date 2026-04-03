@@ -1,5 +1,7 @@
 import { ImageResponse } from "next/og";
 import { getReportBySlug } from "@/lib/supabase";
+import { readFile } from "fs/promises";
+import { join } from "path";
 
 export const size = {
   width: 1200,
@@ -8,10 +10,21 @@ export const size = {
 
 export const contentType = "image/png";
 
-function getStamp(score: number): { label: string; color: string } {
-  if (score < 45) return { label: "RUN", color: "#C40060" };
-  if (score < 70) return { label: "RISKY", color: "#E65100" };
-  return { label: "SLAY", color: "#2E7D32" };
+function getScoreColor(score: number): string {
+  if (score >= 80) return "#2E7D32";
+  if (score >= 50) return "#E65100";
+  if (score >= 35) return "#C40060";
+  return "#8B0000";
+}
+
+function getScoreLabel(score: number): string {
+  if (score >= 90) return "LOCK HIM DOWN";
+  if (score >= 80) return "SLAY";
+  if (score >= 65) return "HE'S AIGHT";
+  if (score >= 50) return "MID";
+  if (score >= 35) return "ICK";
+  if (score >= 20) return "TOXIC";
+  return "RUN";
 }
 
 export default async function OGImage({
@@ -22,114 +35,120 @@ export default async function OGImage({
   const report = await getReportBySlug(params.slug);
 
   const score = report?.dateabilityScore ?? 0;
-  const stamp = getStamp(score);
+  const scoreColor = getScoreColor(score);
+  const scoreLabel = getScoreLabel(score);
   const archetype = report?.archetypeLabel ?? "";
-  const verdict = report?.verdict ?? "";
+
+  // Read the hero OG image as base64 background
+  const ogPath = join(process.cwd(), "public", "og.png");
+  const ogBuffer = await readFile(ogPath);
+  const ogBase64 = `data:image/png;base64,${ogBuffer.toString("base64")}`;
 
   return new ImageResponse(
     (
       <div
         style={{
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
           width: "100%",
           height: "100%",
-          backgroundColor: "#E8779A",
-          padding: "48px",
+          position: "relative",
         }}
       >
-        <div
+        {/* Background — hero image */}
+        <img
+          src={ogBase64}
           style={{
-            display: "flex",
-            fontSize: 36,
-            fontWeight: 700,
-            color: "#FFFFFF",
-            marginBottom: 24,
-          }}
-        >
-          Should I Date This Man?
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 24,
-            marginBottom: 20,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              fontSize: 120,
-              fontWeight: 700,
-              color: "#FFFFFF",
-              lineHeight: 1,
-            }}
-          >
-            {score}
-          </div>
-          <div
-            style={{
-              display: "flex",
-              fontSize: 48,
-              fontWeight: 700,
-              color: "#FFFFFF",
-              backgroundColor: stamp.color,
-              padding: "8px 24px",
-              borderRadius: 12,
-              lineHeight: 1.2,
-            }}
-          >
-            {stamp.label}
-          </div>
-        </div>
-
-        {archetype && (
-          <div
-            style={{
-              display: "flex",
-              fontSize: 28,
-              fontWeight: 600,
-              color: "#FFFFFF",
-              marginBottom: 12,
-              opacity: 0.9,
-            }}
-          >
-            {archetype}
-          </div>
-        )}
-
-        {verdict && (
-          <div
-            style={{
-              display: "flex",
-              fontSize: 22,
-              color: "#FFFFFF",
-              textAlign: "center",
-              maxWidth: 900,
-              opacity: 0.85,
-              marginBottom: 24,
-              lineHeight: 1.4,
-            }}
-          >
-            {verdict.length > 150 ? verdict.slice(0, 147) + "..." : verdict}
-          </div>
-        )}
-
-        <div
-          style={{
-            display: "flex",
-            fontSize: 20,
-            color: "#FFFFFF",
-            opacity: 0.7,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
             position: "absolute",
-            bottom: 32,
+            top: 0,
+            left: 0,
+          }}
+        />
+
+        {/* Dark overlay for readability */}
+        <div
+          style={{
+            display: "flex",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.35)",
+          }}
+        />
+
+        {/* Score overlay — bottom right */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            position: "absolute",
+            bottom: 40,
+            right: 48,
+            backgroundColor: "rgba(255,255,255,0.95)",
+            borderRadius: 20,
+            padding: "24px 36px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
           }}
         >
-          shouldidatethisman.com
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              gap: 4,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                fontSize: 72,
+                fontWeight: 900,
+                color: scoreColor,
+                lineHeight: 1,
+              }}
+            >
+              {score}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                fontSize: 24,
+                fontWeight: 700,
+                color: "#999",
+                lineHeight: 1,
+              }}
+            >
+              /100
+            </div>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              fontSize: 20,
+              fontWeight: 800,
+              color: scoreColor,
+              letterSpacing: 2,
+              marginTop: 4,
+            }}
+          >
+            {scoreLabel}
+          </div>
+          {archetype && (
+            <div
+              style={{
+                display: "flex",
+                fontSize: 16,
+                color: "#666",
+                marginTop: 8,
+              }}
+            >
+              {archetype}
+            </div>
+          )}
         </div>
       </div>
     ),
