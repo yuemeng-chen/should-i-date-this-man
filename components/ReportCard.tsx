@@ -254,31 +254,16 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
   const generateImage = async (): Promise<Blob | null> => {
     if (!reportRef.current) return null;
 
-    await inlineExternalImages(reportRef.current);
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-    // Wait for all inlined images to fully decode before screenshotting
-    // Hide images that failed to inline (still external URLs = will be blank on mobile)
-    const imgs = reportRef.current.querySelectorAll("img");
-    const hiddenImgs: HTMLElement[] = [];
-    imgs.forEach((img) => {
-      if (img.src && !img.src.startsWith("data:") && !img.src.startsWith(window.location.origin)) {
-        // This image couldn't be inlined — hide it so it doesn't show as a blank box
-        const container = img.closest("[data-img-container]") as HTMLElement | null;
-        if (container) {
-          container.style.display = "none";
-          hiddenImgs.push(container);
-        } else {
-          img.style.display = "none";
-          hiddenImgs.push(img);
-        }
-      }
-    });
-
-    await Promise.all(
-      Array.from(imgs)
-        .filter((img) => img.src && img.src.startsWith("data:") && !img.complete)
-        .map((img) => img.decode().catch(() => {}))
-    );
+    // On mobile, hide image containers entirely (CORS prevents inlining)
+    // On desktop, try to inline external images
+    const imgContainers = Array.from(reportRef.current.querySelectorAll("[data-img-container]"));
+    if (isMobile) {
+      imgContainers.forEach((el) => { (el as HTMLElement).style.display = "none"; });
+    } else {
+      await inlineExternalImages(reportRef.current);
+    }
 
     // Simplify the stamp for screenshot — html-to-image can't render
     // mask-image, background-clip, or SVG filters
@@ -309,8 +294,10 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
     if (stamp) {
       stamp.setAttribute("style", stampOriginalStyle);
     }
-    // Restore hidden images
-    hiddenImgs.forEach((el) => { el.style.display = ""; });
+    // Restore hidden image containers
+    if (isMobile) {
+      imgContainers.forEach((el) => { (el as HTMLElement).style.display = ""; });
+    }
 
     const res = await fetch(dataUrl);
     return res.blob();

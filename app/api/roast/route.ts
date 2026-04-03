@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
     content.push({ type: "text", text: userPrompt });
 
     const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 1500,
       system: ROAST_SYSTEM_PROMPT,
       messages: [{ role: "user", content }],
