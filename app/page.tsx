@@ -73,7 +73,19 @@ export default function Home() {
         body: JSON.stringify(request),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        // Vercel returned non-JSON (HTML error page, payload too large, etc.)
+        const hasImages = request.imageBase64s && request.imageBase64s.length > 0;
+        setError(
+          hasImages
+            ? "Upload too large — try fewer screenshots (3-4 is the sweet spot) 📸"
+            : "Something went wrong. Try again!"
+        );
+        return;
+      }
 
       if (!response.ok) {
         setError(data.error ?? "Something went wrong. Try again!");
@@ -88,7 +100,7 @@ export default function Home() {
         document.getElementById("results")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 100);
     } catch {
-      setError("Upload too large or network error — try fewer screenshots (3-4 is the sweet spot) or check your connection 📸");
+      setError("Network error — check your connection and try again.");
     } finally {
       setIsLoading(false);
     }
