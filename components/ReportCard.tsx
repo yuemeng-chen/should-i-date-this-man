@@ -257,10 +257,26 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
     await inlineExternalImages(reportRef.current);
 
     // Wait for all inlined images to fully decode before screenshotting
+    // Hide images that failed to inline (still external URLs = will be blank on mobile)
     const imgs = reportRef.current.querySelectorAll("img");
+    const hiddenImgs: HTMLElement[] = [];
+    imgs.forEach((img) => {
+      if (img.src && !img.src.startsWith("data:") && !img.src.startsWith(window.location.origin)) {
+        // This image couldn't be inlined — hide it so it doesn't show as a blank box
+        const container = img.closest("[data-img-container]") as HTMLElement | null;
+        if (container) {
+          container.style.display = "none";
+          hiddenImgs.push(container);
+        } else {
+          img.style.display = "none";
+          hiddenImgs.push(img);
+        }
+      }
+    });
+
     await Promise.all(
       Array.from(imgs)
-        .filter((img) => img.src && !img.complete)
+        .filter((img) => img.src && img.src.startsWith("data:") && !img.complete)
         .map((img) => img.decode().catch(() => {}))
     );
 
@@ -293,6 +309,8 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
     if (stamp) {
       stamp.setAttribute("style", stampOriginalStyle);
     }
+    // Restore hidden images
+    hiddenImgs.forEach((el) => { el.style.display = ""; });
 
     const res = await fetch(dataUrl);
     return res.blob();
@@ -523,6 +541,7 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
               {/* Fictional Lookalike */}
               {report.fictionalLookalike && (
                 <div
+                  data-img-container
                   className="p-5 flex flex-col"
                   style={{
                     background: "var(--paper)",
@@ -550,6 +569,7 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
               {/* AI Meme */}
               {memeUrl && (
                 <div
+                  data-img-container
                   className="p-5 flex flex-col"
                   style={{
                     background: "var(--paper)",
