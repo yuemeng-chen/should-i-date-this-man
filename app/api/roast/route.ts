@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const t0 = Date.now();
     const body = (await request.json()) as RoastRequest;
     const { profileType, profileUrl, profileText, imageBase64, imageBase64s } =
       body;
@@ -112,6 +113,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const t1 = Date.now();
+    console.log(`[TIMING] Parse + build content: ${t1 - t0}ms | Images: ${images.length}`);
+
     // Try to fetch any URLs found in the pasted text
     let fetchedContent = "";
     let allUrlsBlocked = false;
@@ -159,12 +163,18 @@ export async function POST(request: NextRequest) {
     );
     content.push({ type: "text", text: userPrompt });
 
+    const t2 = Date.now();
+    console.log(`[TIMING] URL fetch: ${t2 - t1}ms`);
+
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 1500,
       system: ROAST_SYSTEM_PROMPT,
       messages: [{ role: "user", content }],
     });
+
+    const t3 = Date.now();
+    console.log(`[TIMING] Claude API: ${t3 - t2}ms | Tokens: ${response.usage?.input_tokens}in/${response.usage?.output_tokens}out`);
 
     // Extract text from response
     const rawText = response.content
@@ -229,6 +239,10 @@ export async function POST(request: NextRequest) {
     const savePromise = saveReport(body, report).catch(() => null);
 
     const [memeUrl, saved] = await Promise.all([memePromise, savePromise]);
+
+    const t4 = Date.now();
+    console.log(`[TIMING] Meme + Supabase: ${t4 - t3}ms | Meme: ${memeUrl ? 'yes' : 'no'} | Saved: ${saved ? 'yes' : 'no'}`);
+    console.log(`[TIMING] TOTAL: ${t4 - t0}ms`);
 
     return NextResponse.json({
       report,
