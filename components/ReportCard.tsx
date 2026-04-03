@@ -248,6 +248,28 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
 
     await inlineExternalImages(reportRef.current);
 
+    // Wait for all inlined images to fully decode before screenshotting
+    const imgs = reportRef.current.querySelectorAll("img");
+    await Promise.all(
+      Array.from(imgs)
+        .filter((img) => img.src && !img.complete)
+        .map((img) => img.decode().catch(() => {}))
+    );
+
+    // Simplify the stamp for screenshot — html-to-image can't render
+    // mask-image, background-clip, or SVG filters
+    const stamp = reportRef.current.querySelector(".stamp") as HTMLElement | null;
+    const stampOriginalStyle = stamp?.getAttribute("style") ?? "";
+    if (stamp) {
+      stamp.style.mask = "none";
+      stamp.style.webkitMask = "none";
+      stamp.style.filter = "none";
+      stamp.style.background = "none";
+      stamp.style.webkitBackgroundClip = "unset";
+      stamp.style.backgroundClip = "unset";
+      stamp.style.webkitTextFillColor = "unset";
+    }
+
     const banner = reportRef.current.querySelector("[data-png-banner]") as HTMLElement | null;
     if (banner) {
       banner.style.display = "block";
@@ -258,6 +280,10 @@ export default function ReportCard({ report, shareSlug, memeUrl, onReset, origin
     const dataUrl = await toPng(reportRef.current, { quality: 1, pixelRatio: 2, backgroundColor: "#E8779A" });
     if (banner) {
       banner.style.display = "none";
+    }
+    // Restore stamp styles
+    if (stamp) {
+      stamp.setAttribute("style", stampOriginalStyle);
     }
 
     const res = await fetch(dataUrl);
