@@ -57,7 +57,7 @@ export default function LoadingState() {
         ))}
       </div>
 
-      <p className="text-xs text-gray-400">should take under a minute ✨</p>
+      <p className="text-xs text-gray-400">should take under a minute · stay on this page ✨</p>
     </div>
   );
 }
